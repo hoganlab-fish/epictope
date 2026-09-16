@@ -69,21 +69,54 @@ sliding_avg <- function(x, window = 7) {
   }, numeric(1))
 }
 
-# Pick candidate tag sites: N-term, best-scoring interior residue, C-term.
-# These are the app's default "top regions of interest" -- highlighted
-# everywhere (score plot, alignment, 3D structure) before the user clicks
-# anything, and listed at the top of the Combined view tab for quick jumps.
-pick_tag_sites <- function(final_df, edge_margin = 10) {
+# Greedy local-extrema picker: finds up to k points that are local maxima
+# (or minima) of `val` -- strictly the highest/lowest of their immediate
+# neighbors -- at least `min_sep` positions apart, chosen best-score-first
+# so several picks never end up crowded on the same hump/dip.
+find_extrema <- function(pos, val, k, min_sep, mode = c("max", "min")) {
+  mode <- match.arg(mode)
+  n <- length(val)
+  if (n < 3 || k <= 0) return(data.frame(position = numeric(0), score = numeric(0)))
+  is_extreme <- vapply(seq_len(n), function(i) {
+    lo <- max(1, i - 1); hi <- min(n, i + 1)
+    nb <- val[lo:hi]
+    if (mode == "max") val[i] == max(nb) else val[i] == min(nb)
+  }, logical(1))
+  cand <- which(is_extreme)
+  cand <- cand[order(val[cand], decreasing = (mode == "max"))]
+  picked <- integer(0)
+  for (idx in cand) {
+    if (length(picked) >= k) break
+    if (length(picked) == 0 || all(abs(pos[picked] - pos[idx]) >= min_sep)) {
+      picked <- c(picked, idx)
+    }
+  }
+  data.frame(position = pos[picked], score = val[picked], stringsAsFactors = FALSE)
+}
+
+# Pick candidate tag sites: N-term, C-term, plus the top-scoring local
+# maxima ("peaks" -- good tagging candidates) and local minima ("poor
+# spots") of the smoothed min-score curve. These are the app's default
+# "regions of interest" -- highlighted everywhere (score plot, alignment,
+# 3D structure) before the user clicks anything, and listed at the top of
+# the Combined view tab for quick jumps.
+pick_tag_sites <- function(final_df, edge_margin = 10, n_extrema = 5, min_sep = 15) {
   final_df <- final_df[order(final_df$position), ]
   smoothed <- sliding_avg(final_df$min, window = 7)
+  pos <- final_df$position
   n <- nrow(final_df)
-  interior <- which(final_df$position > edge_margin & final_df$position < (max(final_df$position) - edge_margin))
+  interior <- which(pos > edge_margin & pos < (max(pos) - edge_margin))
   if (length(interior) == 0) interior <- seq_len(n)
-  best_interior_pos <- final_df$position[interior][which.max(smoothed[interior])]
+
+  peaks  <- find_extrema(pos[interior], smoothed[interior], n_extrema, min_sep, "max")
+  minima <- find_extrema(pos[interior], smoothed[interior], n_extrema, min_sep, "min")
+
   list(
-    n_term = final_df$position[1],
-    interior = best_interior_pos,
-    c_term = final_df$position[n],
+    n_term = pos[1],
+    c_term = pos[n],
+    peaks = peaks,        # data.frame(position, score), best first
+    minima = minima,      # data.frame(position, score), worst first
+    position_vec = pos,   # aligned with `smoothed`, for later lookups
     smoothed = smoothed
   )
 }
@@ -106,9 +139,14 @@ aa_colors <- c(
 )
 
 # Shared "meaning of color" across every panel (score plot, alignment, 3D):
-# amber = default top candidate sites (always shown), blue = whatever the
+# amber = sequence termini, green = top scoring peaks (good tag candidates),
+# purple = top local minima (poor candidates), red = curated UniProt
+# binding-site residues (avoid tagging over these), blue = whatever the
 # user last clicked or range-selected on any panel.
 COLOR_DEFAULT_SITE <- "#FFC107"
+COLOR_PEAK          <- "#2ECC71"
+COLOR_MIN           <- "#AB47BC"
+COLOR_BINDING       <- "#E53935"
 COLOR_USER_TAG      <- "#2979FF"
 
 # Classic alignment "wrap" width (matches typical Clustal/EMBOSS text output)
@@ -116,17 +154,90 @@ COLOR_USER_TAG      <- "#2979FF"
 # instead of one endlessly wide row, so everything fits on screen at once.
 MSA_WRAP_WIDTH <- 60
 
-# Build the (label, id, position) list for the three default candidate
-# sites -- shared by the top-level nav bar, the score plot, the alignment,
-# the 3D view, and the downloadable report, so they never drift apart.
-site_list_for <- function(res) {
-  df <- res$final_df[order(res$final_df$position), ]
-  positions <- c(res$tag_sites$n_term, res$tag_sites$interior, res$tag_sites$c_term)
-  labels <- c("N-term", "Interior (best)", "C-term")
-  ids <- c("goto_nterm", "goto_interior", "goto_cterm")
-  scores <- res$tag_sites$smoothed[match(positions, df$position)]
-  data.frame(id = ids, label = labels, position = positions, score = scores,
-             stringsAsFactors = FALSE)
+# Default windowed view of the alignment: ~300 residues (within the
+# requested 200-400 range) centered on the point of interest, instead of
+# always rendering every homolog's full length at once.
+MSA_DEFAULT_HALF_WIDTH <- 150
+MSA_MAX_HALF_WIDTH <- 200
+
+# Build the (label, id, position, kind) list for every default site --
+# termini, top peaks, and top local minima -- shared by the top-level nav
+# bar, the score plot, the alignment, the 3D view, and the downloadable
+# report, so they never drift apart. `kind` drives which color a site gets.
+site_list_for <- function(ts) {
+  term_pos <- c(ts$n_term, ts$c_term)
+  term_df <- data.frame(
+    id = c("term_n", "term_c"), label = c("N-term", "C-term"),
+    position = term_pos, score = ts$smoothed[match(term_pos, ts$position_vec)],
+    kind = "term", stringsAsFactors = FALSE
+  )
+  peak_df <- if (nrow(ts$peaks) > 0) {
+    data.frame(id = paste0("peak_", seq_len(nrow(ts$peaks))),
+               label = paste0("Peak ", seq_len(nrow(ts$peaks))),
+               position = ts$peaks$position, score = ts$peaks$score,
+               kind = "peak", stringsAsFactors = FALSE)
+  } else NULL
+  min_df <- if (nrow(ts$minima) > 0) {
+    data.frame(id = paste0("min_", seq_len(nrow(ts$minima))),
+               label = paste0("Min ", seq_len(nrow(ts$minima))),
+               position = ts$minima$position, score = ts$minima$score,
+               kind = "min", stringsAsFactors = FALSE)
+  } else NULL
+  do.call(rbind, c(list(term_df), list(peak_df), list(min_df)))
+}
+
+# Parse a UniProt TSV "Binding site" cell (field ft_binding) into a sorted,
+# de-duplicated vector of residue positions. UniProt packs multiple
+# features into one string like:
+#   "BINDING 45; /ligand=\"Zn(2+)\"; ...; BINDING 48..52; /ligand=\"ATP\"; ..."
+# -- we only need the position/range after each "BINDING" keyword.
+parse_uniprot_binding <- function(x) {
+  if (is.null(x) || length(x) == 0 || is.na(x) || !nzchar(x)) return(integer(0))
+  hits <- regmatches(x, gregexpr("BINDING\\s+\\d+(\\.\\.\\d+)?", x, perl = TRUE))[[1]]
+  if (length(hits) == 0) return(integer(0))
+  ranges <- lapply(hits, function(h) {
+    nums <- as.integer(regmatches(h, gregexpr("\\d+", h))[[1]])
+    if (length(nums) == 1) nums else seq(nums[1], nums[2])
+  })
+  sort(unique(unlist(ranges)))
+}
+
+# Collapse a sorted vector of positions into contiguous [start, end] runs,
+# so a stretch of adjacent binding-site residues draws as one shaded band
+# instead of one sliver per residue.
+positions_to_runs <- function(pos) {
+  if (length(pos) == 0) return(data.frame(start = integer(0), end = integer(0)))
+  pos <- sort(unique(pos))
+  breaks <- c(0, which(diff(pos) > 1), length(pos))
+  data.frame(
+    start = pos[breaks[-length(breaks)] + 1],
+    end   = pos[breaks[-1]]
+  )
+}
+
+# Human-readable "45, 48-52, 90" summary of a set of binding-site residues,
+# shared by the nav bar and the downloadable HTML report.
+format_binding_summary <- function(binding_sites) {
+  if (length(binding_sites) == 0) return("None found")
+  runs <- positions_to_runs(binding_sites)
+  paste(apply(runs, 1, function(r) {
+    if (r["start"] == r["end"]) as.character(r["start"]) else sprintf("%d-%d", r["start"], r["end"])
+  }), collapse = ", ")
+}
+
+# A jump-to-position button styled like an actionButton but with a
+# dynamically-set target -- click sends `pos` to a single shared
+# `input$jump_pos`, so an arbitrary, run-time-determined number of buttons
+# (N-term/C-term/peaks/minima) can all be wired up without pre-declaring a
+# static input id (and matching observer) for each one.
+make_jump_button <- function(label, pos, color, tip) {
+  btn <- tags$button(
+    label, type = "button", class = "btn btn-default action-button",
+    style = paste0("background-color:", color,
+                   "; border: 1px solid #333; margin-right: 8px; margin-bottom: 6px;"),
+    onclick = sprintf("Shiny.setInputValue('jump_pos', %d, {priority: 'event'});", pos)
+  )
+  tooltip(btn, tip)
 }
 
 # One-line, consistently-worded banner describing the active user tag --
@@ -221,6 +332,10 @@ ui <- fluidPage(
         "Runs the full pipeline: BLAST homolog search, MUSCLE alignment (Shannon entropy), DSSP secondary structure/RSA, IUPred2A/ANCHOR2 disorder, and combined scoring."
       ),
       tooltip(
+        numericInput("n_extrema", "Top peaks/minima to highlight", value = 5, min = 1, max = 15, step = 1),
+        "How many top-scoring local maxima (good tag candidates, green) and top local minima (poor spots, purple) to mark on every panel, in addition to the N-term/C-term. Updates instantly without re-running the pipeline."
+      ),
+      tooltip(
         downloadButton("download_csv", "Download results CSV"),
         "Download just the full per-residue feature and score table."
       ),
@@ -240,9 +355,9 @@ ui <- fluidPage(
             span("Combined view ⓘ"),
             paste(
               "3D structure, min-score/feature plots, and the raw alignment, all on one page and linked together.",
-              "Amber marks the app's top candidate tag sites by default -- use the buttons at the top to jump straight to one.",
+              "Amber = sequence termini, green = top scoring peaks (good tag candidates), purple = top local minima (poor spots), red = curated UniProt binding-site residues (avoid tagging these) -- use the buttons at the top to jump straight to any of them.",
               "Scrolling the page always works normally over any plot; hold Ctrl (Cmd on Mac) and scroll to zoom that plot instead, or drag a box / use the toolbar to zoom or select a range.",
-              "A click (or a range selection) on any panel highlights that same residue or range -- in blue -- clearly on every other panel, including the 3D structure."
+              "A click (or a range selection) on any panel highlights that same residue or range -- in blue -- clearly on every other panel, including the 3D structure (with a residue-number label)."
             )
           ),
           uiOutput("site_nav_ui"),
@@ -254,8 +369,13 @@ ui <- fluidPage(
                    "Scroll normally to move the page. Hold Ctrl (⌘ on Mac) + scroll to zoom this plot, drag to box-zoom, or use the toolbar to switch to box/lasso select for tagging a range."),
           plotlyOutput("scores_view", height = "570px"),
           tags$hr(),
-          tags$div(style = "font-size: 12px; color: #666; margin-bottom: 4px;",
-                   "Scroll normally to move the page. Hold Ctrl (⌘ on Mac) + scroll to zoom this plot, drag to box-zoom, or use the toolbar to switch to box/lasso select for tagging a range."),
+          tooltip(
+            checkboxInput("msa_full_view", "Show full alignment (disable auto-windowing)", value = FALSE),
+            "By default the alignment below shows only a ~300-residue window centered on the top candidate peak (or wherever you last clicked/selected). Check this to render the entire alignment instead."
+          ),
+          textOutput("msa_window_label"),
+          tags$div(style = "font-size: 12px; color: #666; margin: 4px 0;",
+                   "Scroll normally to move the page. Hold Ctrl (⌘ on Mac) + scroll to zoom this plot, drag to box-zoom, or use the toolbar to switch to box/lasso select for tagging a range. Header rows are a position ruler (residue number every 10 columns) -- a position is never more than a few columns from a visible number."),
           uiOutput("msa_view_ui")
         )
       )
@@ -273,8 +393,9 @@ server <- function(input, output, session) {
       check_config()
 
       uniprot_fields <- c("accession", "id", "gene_names", "xref_alphafolddb",
-                           "sequence", "organism_name", "organism_id")
+                           "sequence", "organism_name", "organism_id", "ft_binding")
       uniprot_data <- query_uniProt(query = input$query, fields = uniprot_fields)
+      binding_sites <- parse_uniprot_binding(uniprot_data$Binding.site)
 
       alphafold_file <- if (!is.null(input$custom_structure)) {
         input$custom_structure$datapath
@@ -310,17 +431,29 @@ server <- function(input, output, session) {
       norm_feats_df <- calculate_scores(features_df)
       final_df <- merge(norm_feats_df, features_df)
 
-      tag_sites <- pick_tag_sites(final_df)
-
-      # Everything the various panels need, computed once per run.
+      # Everything the various panels need, computed once per run. Peak/
+      # minima counts depend on a live UI input (n_extrema), so those are
+      # computed separately in the `tag_sites` reactive below instead of
+      # baked in here -- that lets the user tweak the count without
+      # re-running the whole (slow) pipeline.
       list(
         final_df = final_df,
         msa_res = msa_res,
         alphafold_file = alphafold_file,
-        tag_sites = tag_sites,
+        binding_sites = binding_sites,
         query_id = input$query
       )
     })
+  })
+
+  # Default candidate sites (termini + top peaks/minima), recomputed live
+  # whenever the pipeline reruns or the user changes "Top peaks/minima to
+  # highlight" -- cheap to recompute, so no need to gate it behind `run`.
+  tag_sites <- reactive({
+    res <- results(); req(res)
+    n_extrema <- input$n_extrema
+    if (is.null(n_extrema) || is.na(n_extrema) || n_extrema < 1) n_extrema <- 5
+    pick_tag_sites(res$final_df, n_extrema = n_extrema, min_sep = 15)
   })
 
   # --- Cross-panel tagging state -----------------------------------------
@@ -329,6 +462,55 @@ server <- function(input, output, session) {
   # alignment, 3D structure) reads this and redraws its own highlight.
   tag_range <- reactiveVal(NULL)
   observeEvent(results(), { tag_range(NULL) })
+
+  # All ungapped query-sequence columns in the full alignment (i.e. every
+  # residue position 1..N), independent of any windowing applied for display.
+  full_query_cols <- reactive({
+    res <- results(); req(res)
+    mat_full <- as.matrix(res$msa_res)
+    which(mat_full[res$query_id, ] != "-")
+  })
+
+  # The [start, end] residue range the alignment panel currently renders.
+  # Default: a ~300-residue window (200-400 range) centered on the user's
+  # current selection if any, else the single best interior peak -- i.e.
+  # "the global maximum that isn't on a terminus". The full-view checkbox
+  # overrides this and shows everything.
+  msa_window <- reactive({
+    full_cols <- full_query_cols()
+    n_full <- length(full_cols)
+    if (isTRUE(input$msa_full_view) || n_full <= 2 * MSA_DEFAULT_HALF_WIDTH) {
+      return(c(1, n_full))
+    }
+    ts <- tag_sites()
+    rng <- tag_range()
+    if (!is.null(rng)) {
+      center <- mean(rng)
+      half <- max(MSA_DEFAULT_HALF_WIDTH, min(MSA_MAX_HALF_WIDTH, diff(rng) / 2 + 20))
+    } else {
+      center <- if (nrow(ts$peaks) > 0) ts$peaks$position[1] else ts$n_term
+      half <- MSA_DEFAULT_HALF_WIDTH
+    }
+    lo <- max(1, round(center - half)); hi <- min(n_full, round(center + half))
+    width_target <- min(2 * MSA_DEFAULT_HALF_WIDTH, n_full)
+    if ((hi - lo + 1) < width_target) {
+      deficit <- width_target - (hi - lo + 1)
+      if (lo <= 1) hi <- min(n_full, hi + deficit)
+      else if (hi >= n_full) lo <- max(1, lo - deficit)
+    }
+    c(lo, hi)
+  })
+
+  output$msa_window_label <- renderText({
+    res <- tryCatch(results(), error = function(e) NULL)
+    if (is.null(res)) return("")
+    w <- msa_window(); n <- length(full_query_cols())
+    if (isTRUE(input$msa_full_view) || (w[1] == 1 && w[2] == n)) {
+      sprintf("Showing the full alignment: residues 1-%d.", n)
+    } else {
+      sprintf("Showing residues %d-%d of %d (auto-windowed around the point of interest -- check the box above for the full alignment).", w[1], w[2], n)
+    }
+  })
 
   register_tag_events <- function(source_name) {
     click <- event_data("plotly_click", source = source_name)
@@ -353,36 +535,50 @@ server <- function(input, output, session) {
   output$score_table <- renderTable(head(results()$final_df, 20))
 
   # --- Alignment layout (shared by the MSA panel and the nav "jump to") ---
+  # Only the currently-windowed columns (see `msa_window`) are materialized,
+  # so switching windows never has to lay out the full alignment underneath.
   msa_layout <- reactive({
     res <- results()
     mat_full <- as.matrix(res$msa_res)
-    query_cols <- which(mat_full[res$query_id, ] != "-")
+    full_cols <- full_query_cols()
+    win <- msa_window()
+    query_cols <- full_cols[win[1]:win[2]]
     mat <- mat_full[, query_cols, drop = FALSE]
     seq_names <- sub("\\..*$", "", sub(".*/", "", rownames(mat)))
     n_positions <- length(query_cols)
     n_seqs <- nrow(mat)
     n_blocks <- ceiling(n_positions / MSA_WRAP_WIDTH)
     list(mat = mat, seq_names = seq_names, n_positions = n_positions,
-         n_seqs = n_seqs, n_blocks = n_blocks)
+         n_seqs = n_seqs, n_blocks = n_blocks, window_start = win[1])
   })
 
   # --- Top-of-tab nav bar: jump straight to any candidate site ------------
   output$site_nav_ui <- renderUI({
     res <- tryCatch(results(), error = function(e) NULL)
     if (is.null(res)) return(tags$em("Run EpicTope to see candidate tag sites here."))
-    sites <- site_list_for(res)
+    ts <- tag_sites()
+    sites <- site_list_for(ts)
+    kind_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK, min = COLOR_MIN)
+    binding_line <- if (length(res$binding_sites) > 0) {
+      sprintf("Curated UniProt binding-site residues (shown in red everywhere): %s.",
+              format_binding_summary(res$binding_sites))
+    } else {
+      "No curated UniProt binding-site annotations found for this protein."
+    }
     tagList(
-      tags$strong("Top candidate tag sites: "),
+      tags$strong("Candidate / notable sites: "),
       tagList(lapply(seq_len(nrow(sites)), function(i) {
         s <- sites[i, ]
-        tooltip(
-          actionButton(s$id, sprintf("%s — pos %d (%.3f)", s$label, s$position, s$score),
-                       style = paste0("background-color:", COLOR_DEFAULT_SITE,
-                                      "; border: 1px solid #7a5b00; margin-right: 8px; margin-bottom: 6px;")),
-          sprintf("Jump to the %s candidate site (residue %d): highlights it in blue everywhere, zooms the score plot around it, and scrolls the alignment to the right block.",
+        make_jump_button(
+          sprintf("%s — pos %d (%.3f)", s$label, s$position, s$score),
+          s$position, kind_color[[s$kind]],
+          sprintf("Jump to %s (residue %d): highlights it in blue everywhere and centers the alignment window on it.",
                   s$label, s$position)
         )
       })),
+      tags$div(style = "margin-top: 2px; font-size: 12px; color: #555;",
+               "Amber = termini · Green = top peaks (good candidates) · Purple = top local minima (poor candidates) · Red = UniProt binding site · Blue = your current selection."),
+      tags$div(style = "margin-top: 4px; font-size: 12px; color: #555;", binding_line),
       tags$div(style = "margin-top: 4px; font-style: italic; color: #444;",
                textOutput("tag_banner", inline = TRUE))
     )
@@ -399,25 +595,33 @@ server <- function(input, output, session) {
     plotlyProxy("scores_view", session) %>%
       plotlyProxyInvoke("relayout", list(xaxis.range = list(pos - half_window, pos + half_window)))
 
-    ml <- msa_layout()
-    rows_per_block <- ml$n_seqs + 1
-    block_idx <- ((pos - 1) %/% MSA_WRAP_WIDTH) + 1
-    total_rows <- ml$n_blocks * rows_per_block
-    row_start <- (block_idx - 1) * rows_per_block
-    session$sendCustomMessage("scrollToOffset",
-                               list(elementId = "msa_view", fraction = row_start / max(1, total_rows)))
+    # The alignment re-windows itself around the new tag_range() on its own
+    # (see `msa_window`); just scroll the page to bring it into view.
+    session$sendCustomMessage("scrollToOffset", list(elementId = "msa_view", fraction = 0.05))
   }
-  observeEvent(input$goto_nterm, jump_to_position(results()$tag_sites$n_term))
-  observeEvent(input$goto_interior, jump_to_position(results()$tag_sites$interior))
-  observeEvent(input$goto_cterm, jump_to_position(results()$tag_sites$c_term))
+  observeEvent(input$jump_pos, jump_to_position(input$jump_pos))
 
   # --- Panel: min-score + feature tracks (Fig 6C / 6B), zoomable ----------
   output$scores_view <- renderPlotly({
     res <- results()
     df <- res$final_df[order(res$final_df$position), ]
-    smoothed <- res$tag_sites$smoothed
+    ts <- tag_sites()
+    smoothed <- ts$smoothed
 
-    sites <- site_list_for(res)
+    sites <- site_list_for(ts)
+    term_sites <- sites[sites$kind == "term", ]
+    peak_sites <- sites[sites$kind == "peak", ]
+    min_sites  <- sites[sites$kind == "min", ]
+
+    add_kind_markers <- function(p, sdf, color, symbol) {
+      if (nrow(sdf) == 0) return(p)
+      p %>% add_markers(data = sdf, x = ~position, y = ~score, showlegend = FALSE,
+                         marker = list(color = color, size = 14, symbol = symbol,
+                                       line = list(color = "#333", width = 2)),
+                         customdata = ~position,
+                         text = ~paste0(label, ": ", sprintf("%.3f", score)),
+                         hovertemplate = "%{text}<extra></extra>")
+    }
 
     # mode = "lines+markers" with invisible markers so the toolbar's box/lasso
     # select tool has actual points to hit-test against (a pure "lines" trace
@@ -427,12 +631,9 @@ server <- function(input, output, session) {
                 name = "Min score", line = list(color = "black"),
                 marker = list(size = 8, opacity = 0), customdata = ~position,
                 hovertemplate = "Position %{x}<br>Min score %{y:.3f}<extra></extra>") %>%
-      add_markers(data = sites, x = ~position, y = ~score, showlegend = FALSE,
-                  marker = list(color = COLOR_DEFAULT_SITE, size = 14, symbol = "diamond",
-                                line = list(color = "#7a5b00", width = 2)),
-                  customdata = ~position,
-                  text = ~paste0(label, ": ", sprintf("%.3f", score)),
-                  hovertemplate = "%{text}<extra></extra>") %>%
+      add_kind_markers(term_sites, COLOR_DEFAULT_SITE, "diamond") %>%
+      add_kind_markers(peak_sites, COLOR_PEAK, "triangle-up") %>%
+      add_kind_markers(min_sites, COLOR_MIN, "triangle-down") %>%
       layout(yaxis = list(title = "Min score (7-res avg)"))
 
     p2 <- plot_ly(source = "scores_view")
@@ -452,25 +653,44 @@ server <- function(input, output, session) {
     }
     p2 <- p2 %>% layout(yaxis = list(title = "Normalized score", range = c(0, 1)))
 
-    # Default "top regions of interest" -- always shown as a shaded band (not
+    # Default "regions of interest" -- always shown as a shaded band (not
     # just a hairline) plus a bold dashed center line, so they read as
     # regions at a glance, not something you have to spot a thin line for.
-    site_bands <- lapply(sites$position, function(pos) {
-      list(type = "rect", x0 = pos - 1.5, x1 = pos + 1.5, y0 = 0, y1 = 1, xref = "x",
-           fillcolor = COLOR_DEFAULT_SITE, opacity = 0.30, line = list(width = 0))
-    })
-    site_lines <- lapply(sites$position, function(pos) {
-      list(type = "line", x0 = pos, x1 = pos, y0 = 0, y1 = 1, xref = "x",
-           line = list(color = "#7a5b00", dash = "dash", width = 2))
-    })
-    site_annotations <- lapply(seq_len(nrow(sites)), function(i) {
-      list(x = sites$position[i], y = sites$score[i], xref = "x", yref = "y",
-           text = sprintf("%.3f", sites$score[i]), showarrow = TRUE, arrowhead = 0,
-           ax = 0, ay = -25, font = list(size = 11, color = "#7a5b00", family = "Arial Black"))
-    })
+    build_site_shapes <- function(sdf, fill_color, line_color) {
+      if (nrow(sdf) == 0) return(list(bands = list(), lines = list(), annotations = list()))
+      bands <- lapply(sdf$position, function(pos) {
+        list(type = "rect", x0 = pos - 1.5, x1 = pos + 1.5, y0 = 0, y1 = 1, xref = "x",
+             fillcolor = fill_color, opacity = 0.30, line = list(width = 0))
+      })
+      lines <- lapply(sdf$position, function(pos) {
+        list(type = "line", x0 = pos, x1 = pos, y0 = 0, y1 = 1, xref = "x",
+             line = list(color = line_color, dash = "dash", width = 2))
+      })
+      annotations <- lapply(seq_len(nrow(sdf)), function(i) {
+        list(x = sdf$position[i], y = sdf$score[i], xref = "x", yref = "y",
+             text = sprintf("%.3f", sdf$score[i]), showarrow = TRUE, arrowhead = 0,
+             ax = 0, ay = -25, font = list(size = 11, color = line_color, family = "Arial Black"))
+      })
+      list(bands = bands, lines = lines, annotations = annotations)
+    }
+    term_vis <- build_site_shapes(term_sites, COLOR_DEFAULT_SITE, "#7a5b00")
+    peak_vis <- build_site_shapes(peak_sites, COLOR_PEAK, "#1b7a41")
+    min_vis  <- build_site_shapes(min_sites, COLOR_MIN, "#6a1b7a")
+
+    # Curated UniProt binding-site residues -- drawn as wide, low-opacity
+    # red bands (behind everything else) so tagging near a known functional
+    # site is obvious without needing per-residue diamonds/labels.
+    binding_runs <- positions_to_runs(res$binding_sites)
+    binding_shapes <- if (nrow(binding_runs) > 0) {
+      lapply(seq_len(nrow(binding_runs)), function(i) {
+        list(type = "rect", x0 = binding_runs$start[i] - 0.5, x1 = binding_runs$end[i] + 0.5,
+             y0 = 0, y1 = 1, xref = "x", fillcolor = COLOR_BINDING, opacity = 0.18, line = list(width = 0))
+      })
+    } else list()
+
     # Whatever the user last clicked/selected -- on this panel or any other --
     # drawn last (on top) with a solid outline so it's unmistakable even when
-    # it overlaps a default amber site.
+    # it overlaps a default site.
     user_shapes <- if (!is.null(tag_range())) {
       rng <- tag_range()
       list(list(type = "rect", x0 = rng[1] - 1, x1 = rng[2] + 1, y0 = 0, y1 = 1, xref = "x",
@@ -478,7 +698,9 @@ server <- function(input, output, session) {
                 line = list(color = COLOR_USER_TAG, width = 3)))
     } else list()
 
-    all_shapes <- c(site_bands, site_lines, user_shapes)
+    all_shapes <- c(binding_shapes, term_vis$bands, peak_vis$bands, min_vis$bands,
+                     term_vis$lines, peak_vis$lines, min_vis$lines, user_shapes)
+    all_annotations <- c(term_vis$annotations, peak_vis$annotations, min_vis$annotations)
     banner <- list(list(x = 0, y = 1.16, xref = "paper", yref = "paper", xanchor = "left",
                          showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
                          text = tag_banner_text(tag_range())))
@@ -497,7 +719,7 @@ server <- function(input, output, session) {
           lapply(all_shapes, function(s) { s$yref <- "y"; s }),
           lapply(all_shapes, function(s) { s$yref <- "y2"; s })
         ),
-        annotations = c(lapply(site_annotations, function(a) { a$yref <- "y"; a }), banner)
+        annotations = c(lapply(all_annotations, function(a) { a$yref <- "y"; a }), banner)
       ) %>%
       event_register("plotly_click") %>%
       event_register("plotly_selected") %>%
@@ -519,28 +741,34 @@ server <- function(input, output, session) {
     ml <- msa_layout()
     mat <- ml$mat; seq_names <- ml$seq_names
     n_positions <- ml$n_positions; n_seqs <- ml$n_seqs; n_blocks <- ml$n_blocks
+    abs_offset <- ml$window_start - 1  # local col j -> absolute residue position j + abs_offset
 
     letters_present <- sort(unique(as.vector(mat)))
     n_base <- length(letters_present)
     letter_idx <- setNames(seq_along(letters_present) - 1, letters_present)
 
-    # Two extra color bins appended after the amino-acid letters: default
-    # "top region of interest" highlight, and the user's active click/range.
-    # Keeping these as literal cell colors (rather than shapes drawn over a
-    # categorical axis, which plotly handles inconsistently) guarantees the
-    # highlight renders correctly regardless of how the alignment is wrapped.
-    # On top of the color swap we also draw a thick outline marker over every
-    # highlighted cell (below) so it reads as an obvious "flagged" cell, not
-    # just a different shade of a similar color.
+    # Four extra color bins appended after the amino-acid letters: termini,
+    # top peaks, top local minima, UniProt binding sites, and the user's
+    # active click/range. Keeping these as literal cell colors (rather than
+    # shapes drawn over a categorical axis, which plotly handles
+    # inconsistently) guarantees the highlight renders correctly regardless
+    # of how the alignment is wrapped. On top of the color swap we also draw
+    # a thick outline marker over every highlighted cell (below) so it reads
+    # as an obvious "flagged" cell, not just a different shade of a similar
+    # color. Later categories are applied after earlier ones per cell, so a
+    # user selection always wins a tie over a default site.
     bin_colors <- c(
       vapply(letters_present, function(l) {
         c <- unname(aa_colors[l]); if (is.na(c)) "#BBBBBB" else c
       }, character(1)),
-      COLOR_DEFAULT_SITE, COLOR_USER_TAG
+      COLOR_DEFAULT_SITE, COLOR_PEAK, COLOR_MIN, COLOR_BINDING, COLOR_USER_TAG
     )
     n_total_bins <- length(bin_colors)
-    idx_default <- n_base
-    idx_user    <- n_base + 1
+    idx_term    <- n_base
+    idx_peak    <- n_base + 1
+    idx_min     <- n_base + 2
+    idx_binding <- n_base + 3
+    idx_user    <- n_base + 4
 
     msa_colorscale <- list()
     for (i in seq_along(bin_colors)) {
@@ -548,7 +776,12 @@ server <- function(input, output, session) {
       msa_colorscale[[length(msa_colorscale) + 1]] <- list(i / n_total_bins, bin_colors[i])
     }
 
-    tag_positions <- site_list_for(res)$position
+    ts <- tag_sites()
+    sites <- site_list_for(ts)
+    term_positions    <- sites$position[sites$kind == "term"]
+    peak_positions    <- sites$position[sites$kind == "peak"]
+    min_positions     <- sites$position[sites$kind == "min"]
+    binding_positions <- res$binding_sites
     user_positions <- if (!is.null(tag_range())) {
       rng <- tag_range(); seq(rng[1], rng[2])
     } else integer(0)
@@ -556,18 +789,31 @@ server <- function(input, output, session) {
     rows_key <- character(0); rows_label <- character(0)
     z_list <- list(); text_list <- list(); customdata_list <- list()
     # Collected (x, y) coordinates for the outline-marker overlay traces.
-    default_dots_x <- c(); default_dots_y <- c()
+    term_dots_x <- c(); term_dots_y <- c()
+    peak_dots_x <- c(); peak_dots_y <- c()
+    min_dots_x <- c(); min_dots_y <- c()
+    binding_dots_x <- c(); binding_dots_y <- c()
     user_dots_x <- c(); user_dots_y <- c()
 
     for (b in seq_len(n_blocks)) {
       start_col <- (b - 1) * MSA_WRAP_WIDTH + 1
       end_col   <- min(b * MSA_WRAP_WIDTH, n_positions)
       block_len <- end_col - start_col + 1
+      block_abs <- (start_col:end_col) + abs_offset
+
+      # Ruler header: absolute residue number every 10 positions, plus the
+      # block's very first column -- so a position is never more than ~10
+      # columns from a visible number, no matter where the view is scrolled
+      # (the classic Clustal/EMBOSS wrapped-alignment ruler convention).
+      header_text <- rep("", MSA_WRAP_WIDTH)
+      tick_local <- which(block_abs %% 10 == 0)
+      if (length(tick_local) == 0 || tick_local[1] != 1) tick_local <- c(1, tick_local)
+      header_text[tick_local] <- as.character(block_abs[tick_local])
 
       rows_key   <- c(rows_key, paste0("__hdr", b))
-      rows_label <- c(rows_label, sprintf("Position %d–%d", start_col, end_col))
+      rows_label <- c(rows_label, "")
       z_list[[length(z_list) + 1]] <- rep(NA_real_, MSA_WRAP_WIDTH)
-      text_list[[length(text_list) + 1]] <- rep("", MSA_WRAP_WIDTH)
+      text_list[[length(text_list) + 1]] <- header_text
       customdata_list[[length(customdata_list) + 1]] <- rep(NA_real_, MSA_WRAP_WIDTH)
 
       for (i in seq_len(n_seqs)) {
@@ -580,23 +826,37 @@ server <- function(input, output, session) {
         row_customdata <- rep(NA_real_, MSA_WRAP_WIDTH)
         idx <- seq_len(block_len)
         cols <- start_col:end_col
+        abs_cols <- block_abs[idx]
         row_letters[idx] <- mat[i, cols]
         row_z[idx] <- letter_idx[mat[i, cols]]
-        row_customdata[idx] <- cols
+        row_customdata[idx] <- abs_cols
 
-        # Overlay default/user highlights onto this row's cells, and record
-        # their coordinates for the outline-marker overlay added below.
-        hit_default <- which(cols %in% tag_positions)
-        if (length(hit_default) > 0) {
-          row_z[idx[hit_default]] <- idx_default
-          default_dots_x <- c(default_dots_x, idx[hit_default])
-          default_dots_y <- c(default_dots_y, rep(row_key, length(hit_default)))
+        # Overlay each highlight category onto this row's cells, and record
+        # coordinates for the outline-marker overlay added below.
+        hit_term <- which(abs_cols %in% term_positions)
+        if (length(hit_term) > 0) {
+          row_z[idx[hit_term]] <- idx_term
+          term_dots_x <- c(term_dots_x, idx[hit_term]); term_dots_y <- c(term_dots_y, rep(row_key, length(hit_term)))
         }
-        hit_user <- which(cols %in% user_positions)
+        hit_peak <- which(abs_cols %in% peak_positions)
+        if (length(hit_peak) > 0) {
+          row_z[idx[hit_peak]] <- idx_peak
+          peak_dots_x <- c(peak_dots_x, idx[hit_peak]); peak_dots_y <- c(peak_dots_y, rep(row_key, length(hit_peak)))
+        }
+        hit_min <- which(abs_cols %in% min_positions)
+        if (length(hit_min) > 0) {
+          row_z[idx[hit_min]] <- idx_min
+          min_dots_x <- c(min_dots_x, idx[hit_min]); min_dots_y <- c(min_dots_y, rep(row_key, length(hit_min)))
+        }
+        hit_binding <- which(abs_cols %in% binding_positions)
+        if (length(hit_binding) > 0) {
+          row_z[idx[hit_binding]] <- idx_binding
+          binding_dots_x <- c(binding_dots_x, idx[hit_binding]); binding_dots_y <- c(binding_dots_y, rep(row_key, length(hit_binding)))
+        }
+        hit_user <- which(abs_cols %in% user_positions)
         if (length(hit_user) > 0) {
           row_z[idx[hit_user]] <- idx_user
-          user_dots_x <- c(user_dots_x, idx[hit_user])
-          user_dots_y <- c(user_dots_y, rep(row_key, length(hit_user)))
+          user_dots_x <- c(user_dots_x, idx[hit_user]); user_dots_y <- c(user_dots_y, rep(row_key, length(hit_user)))
         }
 
         z_list[[length(z_list) + 1]] <- row_z
@@ -621,18 +881,18 @@ server <- function(input, output, session) {
     # Thick square outlines over every highlighted cell -- on top of the
     # heatmap, so a tagged column is obvious even at a glance, not just a
     # slightly different fill color.
-    if (length(default_dots_x) > 0) {
-      p <- p %>% add_markers(x = default_dots_x, y = default_dots_y, showlegend = FALSE,
-                              marker = list(symbol = "square-open", size = 20,
-                                            line = list(color = "#7a5b00", width = 3)),
-                              hoverinfo = "skip")
+    outline <- function(p, x, y, color, size) {
+      if (length(x) == 0) return(p)
+      p %>% add_markers(x = x, y = y, showlegend = FALSE,
+                         marker = list(symbol = "square-open", size = size, line = list(color = color, width = 3)),
+                         hoverinfo = "skip")
     }
-    if (length(user_dots_x) > 0) {
-      p <- p %>% add_markers(x = user_dots_x, y = user_dots_y, showlegend = FALSE,
-                              marker = list(symbol = "square-open", size = 22,
-                                            line = list(color = COLOR_USER_TAG, width = 4)),
-                              hoverinfo = "skip")
-    }
+    p <- p %>%
+      outline(term_dots_x, term_dots_y, "#7a5b00", 20) %>%
+      outline(peak_dots_x, peak_dots_y, "#1b7a41", 20) %>%
+      outline(min_dots_x, min_dots_y, "#6a1b7a", 20) %>%
+      outline(binding_dots_x, binding_dots_y, "#8a1c1c", 20) %>%
+      outline(user_dots_x, user_dots_y, COLOR_USER_TAG, 22)
 
     p %>%
       layout(
@@ -654,6 +914,8 @@ server <- function(input, output, session) {
   output$structure_view <- renderNGLVieweR({
     res <- results()
     req(res$alphafold_file)
+    ts <- tag_sites()
+    sites <- site_list_for(ts)
 
     # NGLVieweR reads local files itself (readLines) and hands NGL.js the raw
     # text as a Blob -- so a relative-vs-absolute path was never the real
@@ -690,21 +952,36 @@ server <- function(input, output, session) {
     cat("structure_view: loading", abs_path, "(format:", struct_format,
         ") exists =", file.exists(abs_path), "\n")
 
-    # Default top-candidate sites, all highlighted as bold spacefill blobs
-    # (much harder to miss than thin ball-and-stick) -- named so the proxy
-    # below can add/replace a separate "userTag" selection independently.
-    NGLVieweR(abs_path, format = struct_format) %>%
-      addRepresentation("cartoon", param = list(colorScheme = "residueindex")) %>%
-      addRepresentation("spacefill", param = list(name = "site_n_term",
-                         sele = as.character(res$tag_sites$n_term), colorValue = COLOR_DEFAULT_SITE,
-                         opacity = 0.9)) %>%
-      addRepresentation("spacefill", param = list(name = "site_interior",
-                         sele = as.character(res$tag_sites$interior), colorValue = COLOR_DEFAULT_SITE,
-                         opacity = 0.9)) %>%
-      addRepresentation("spacefill", param = list(name = "site_c_term",
-                         sele = as.character(res$tag_sites$c_term), colorValue = COLOR_DEFAULT_SITE,
-                         opacity = 0.9)) %>%
-      stageParameters(backgroundColor = "white")
+    # Default candidate sites, all highlighted as bold spacefill blobs (much
+    # harder to miss than thin ball-and-stick) plus a residue-number label,
+    # named so the proxy below can add/replace a separate "userTag"
+    # selection independently. Curated UniProt binding-site residues get
+    # their own translucent red spacefill so functional sites are obvious
+    # right on the structure, not just in the plots.
+    kind_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK, min = COLOR_MIN)
+    viewer <- NGLVieweR(abs_path, format = struct_format) %>%
+      addRepresentation("cartoon", param = list(colorScheme = "residueindex"))
+
+    for (i in seq_len(nrow(sites))) {
+      s <- sites[i, ]
+      viewer <- viewer %>%
+        addRepresentation("spacefill", param = list(
+          name = paste0("site_", s$id), sele = as.character(s$position),
+          colorValue = kind_color[[s$kind]], opacity = 0.9)) %>%
+        addRepresentation("label", param = list(
+          sele = as.character(s$position), labelType = "format", labelFormat = "%(resno)s",
+          labelGrouping = "residue", color = kind_color[[s$kind]],
+          showBackground = TRUE, backgroundColor = "black", backgroundOpacity = 0.5))
+    }
+
+    if (length(res$binding_sites) > 0) {
+      viewer <- viewer %>%
+        addRepresentation("spacefill", param = list(
+          name = "uniprot_binding", sele = paste(res$binding_sites, collapse = " or "),
+          colorValue = COLOR_BINDING, opacity = 0.55))
+    }
+
+    viewer %>% stageParameters(backgroundColor = "white")
   })
 
   # Whatever gets clicked/selected on the score, feature, or alignment panel
@@ -714,12 +991,18 @@ server <- function(input, output, session) {
   observeEvent(tag_range(), {
     req(results())
     proxy <- NGLVieweR_proxy("structure_view")
-    proxy %>% removeSelection("userTag")
+    proxy %>% removeSelection("userTag") %>% removeSelection("userTagLabel")
     rng <- tag_range()
     if (!is.null(rng)) {
       sele_str <- if (rng[1] == rng[2]) as.character(rng[1]) else paste0(rng[1], "-", rng[2])
-      proxy %>% addSelection("spacefill", param = list(name = "userTag", sele = sele_str,
-                                                        colorValue = COLOR_USER_TAG, opacity = 0.9))
+      proxy %>%
+        addSelection("spacefill", param = list(name = "userTag", sele = sele_str,
+                                                colorValue = COLOR_USER_TAG, opacity = 0.9)) %>%
+        addSelection("label", param = list(name = "userTagLabel", sele = sele_str,
+                                            labelType = "format", labelFormat = "%(resno)s",
+                                            labelGrouping = "residue", color = COLOR_USER_TAG,
+                                            showBackground = TRUE, backgroundColor = "black",
+                                            backgroundOpacity = 0.5))
     }
   }, ignoreNULL = FALSE)
 
@@ -733,8 +1016,11 @@ server <- function(input, output, session) {
     filename = function() paste0(results()$query_id, "_epictope_report.zip"),
     content = function(file) {
       res <- results()
+      ts <- tag_sites()
       df <- res$final_df[order(res$final_df$position), ]
-      sites <- site_list_for(res)
+      sites <- site_list_for(ts)
+      kind_color <- c(term = "#7a5b00", peak = "#1b7a41", min = "#6a1b7a")
+      site_colors <- kind_color[sites$kind]
 
       tmp_dir <- tempfile("epictope_report_")
       dir.create(tmp_dir)
@@ -752,19 +1038,26 @@ server <- function(input, output, session) {
 
       # 4. Static min-score plot (base R graphics only -- no extra dependency)
       png(file.path(tmp_dir, "min_score_plot.png"), width = 1000, height = 400)
-      plot(df$position, res$tag_sites$smoothed, type = "l", xlab = "Residue position",
+      plot(df$position, ts$smoothed, type = "l", xlab = "Residue position",
            ylab = "Min score (7-res avg)", main = paste("EpicTope min-score profile:", res$query_id))
-      abline(v = sites$position, col = "#b3861c", lty = 2)
-      points(sites$position, sites$score, pch = 18, col = "#b3861c", cex = 1.6)
-      text(sites$position, sites$score, labels = sites$label, pos = 3, col = "#7a5b00", cex = 0.8)
+      if (length(res$binding_sites) > 0) {
+        binding_runs <- positions_to_runs(res$binding_sites)
+        rect(binding_runs$start - 0.5, par("usr")[3], binding_runs$end + 0.5, par("usr")[4],
+             col = grDevices::adjustcolor(COLOR_BINDING, alpha.f = 0.15), border = NA)
+      }
+      abline(v = sites$position, col = site_colors, lty = 2)
+      points(sites$position, sites$score, pch = 18, col = site_colors, cex = 1.6)
+      text(sites$position, sites$score, labels = sites$label, pos = 3, col = site_colors, cex = 0.8)
       dev.off()
 
       # 5. Self-contained HTML summary report (relative image path -> works
       #    once the zip is extracted, no bundling/knitting dependency needed)
+      kind_label <- c(term = "Terminus", peak = "Peak (candidate)", min = "Local minimum (poor)")
       tag_rows <- paste0(
-        "<tr><td>", sites$label, "</td><td>", sites$position, "</td><td>",
+        "<tr><td>", sites$label, "</td><td>", kind_label[sites$kind], "</td><td>", sites$position, "</td><td>",
         sprintf("%.3f", sites$score), "</td></tr>", collapse = "\n"
       )
+      binding_summary <- format_binding_summary(res$binding_sites)
       n_homologs <- nrow(as.matrix(res$msa_res)) - 1
       html <- sprintf(
         '<!DOCTYPE html><html><head><meta charset="utf-8">
@@ -780,10 +1073,13 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
 <h1>EpicTope analysis report</h1>
 <p class="meta">Query: <b>%s</b> &middot; Generated %s</p>
 
-<h2>Top candidate tag sites</h2>
-<table><tr><th>Site</th><th>Residue position</th><th>Min score (7-res avg)</th></tr>
+<h2>Candidate / notable sites</h2>
+<table><tr><th>Site</th><th>Type</th><th>Residue position</th><th>Min score (7-res avg)</th></tr>
 %s
 </table>
+
+<h2>UniProt binding-site residues</h2>
+<p>%s</p>
 
 <h2>Min-score profile</h2>
 <img src="min_score_plot.png" alt="Min-score profile">
@@ -804,7 +1100,7 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
 </ul>
 </body></html>',
         res$query_id, res$query_id, format(Sys.time(), "%Y-%m-%d %H:%M"),
-        tag_rows, nrow(df), n_homologs, struct_name,
+        tag_rows, binding_summary, nrow(df), n_homologs, struct_name,
         res$query_id, res$query_id, struct_name
       )
       writeLines(html, file.path(tmp_dir, paste0(res$query_id, "_report.html")))
