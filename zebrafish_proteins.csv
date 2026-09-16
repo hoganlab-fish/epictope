@@ -1,0 +1,484 @@
+uniprot_id,gene_name,protein_name,length,alphafold_id
+A0A0G2KQY6,slc39a14,Metal cation symporter ZIP14 (Solute carrier family 39 member 14) (Zrt- and Irt-like protein 14) (ZIP-14),494,A0A0G2KQY6
+A0A0G2KTI4,slc12a2,Solute carrier family 12 member 2 (Bumetanide-sensitive sodium-(potassium)-chloride cotransporter 2) (BSC2) (Na-K-Cl cotransporter 1) (NKCC1),1136,A0A0G2KTI4
+A0A0G2L7I0,sprtn,DNA-dependent metalloprotease SPRTN (EC 3.4.24.-) (Protein with SprT-like domain at the N terminus) (Spartan),636,A0A0G2L7I0
+A0A0N9E2K8,mmp21,Matrix metallopeptidase-21 (MMP-21) (EC 3.4.24.-),599,A0A0N9E2K8
+A0A0R4I9Y1,rnf213b,E3 ubiquitin-protein ligase rnf213-beta (EC 2.3.2.27) (EC 3.6.4.-) (E3 ubiquitin-lipopolysaccharide ligase rnf213-beta) (EC 2.3.2.-) (Mysterin-B) (Mysterin-beta) (RING finger protein 213-B) (RING finger protein 213-beta),5061,
+A0A0R4IBK5,rnf213a,E3 ubiquitin-protein ligase rnf213-alpha (EC 2.3.2.27) (EC 3.6.4.-) (E3 ubiquitin-lipopolysaccharide ligase rnf213-alpha) (EC 2.3.2.-) (Mysterin-A) (Mysterin-alpha) (RING finger protein 213-A) (RING finger protein 213-alpha),5209,
+A0A0R4IDX9,ninj1,Ninjurin-1 (Nerve injury-induced protein 1),146,A0A0R4IDX9
+A0A0R4IEW8,elavl4,ELAV-like protein 4 (Protein elrD),411,A0A0R4IEW8
+A0A0R4IFG5,cfap53,Cilia- and flagella-associated protein 53 (Coiled-coil domain-containing protein 11),519,A0A0R4IFG5
+A0A0R4IKJ1,pcif1,mRNA (2'-O-methyladenosine-N(6)-)-methyltransferase (EC 2.1.1.62) (Cap-specific adenosine methyltransferase) (CAPAM) (zCAPAM) (Phosphorylated CTD-interacting factor 1),721,A0A0R4IKJ1
+A0A0R4IKU3,reck,Reversion-inducing cysteine-rich protein with Kazal motifs,955,A0A0R4IKU3
+A0A0R4ILB2,flvcr2a,Choline/ethanolamine transporter flvcr2a (Feline leukemia virus subgroup C receptor-related protein 2 homolog A) (Heme transporter flvcr2a) (Major facilitator superfamily domain containing 7C-a),470,A0A0R4ILB2
+A0A0R4IMY7,trpm2,Transient receptor potential cation channel subfamily M member 2,1470,A0A0R4IMY7
+A0A0R4IVA4,cdc14ab,Dual specificity protein phosphatase CDC14AB (EC 3.1.3.16) (EC 3.1.3.48) (CDC14 cell division cycle 14 homolog AB),611,A0A0R4IVA4
+A0A0R4IVV0,mttp,Microsomal triglyceride transfer protein large subunit,884,A0A0R4IVV0
+A0A0R4IXF6,kat2a,Histone acetyltransferase KAT2A (EC 2.3.1.48) (Histone glutaryltransferase KAT2A) (EC 2.3.1.-) (Histone succinyltransferase KAT2A) (EC 2.3.1.-) (Lysine acetyltransferase 2A),795,A0A0R4IXF6
+A0A0R4IY06,plaat1,Phospholipase A and acyltransferase 1 (EC 2.3.1.-) (EC 3.1.1.32) (EC 3.1.1.4),179,A0A0R4IY06
+A0A0R4IZ84,smg6,Telomerase-binding protein EST1A (EC 3.1.-.-) (Ever shorter telomeres 1A) (Nonsense mediated mRNA decay factor SMG6) (Smg-6 homolog),1544,A0A0R4IZ84
+A0A193KX02,tomt,Transmembrane O-methyltransferase homolog (EC 2.1.1.6) (Protein mercury),259,A0A193KX02
+A0A1D5NS60,znf16l,Zinc finger protein 16-like (Zinc finger protein 697-like),528,A0A1D5NS60
+A0A1D5NSK0,cirop,Ciliated left-right organizer metallopeptidase (EC 3.4.24.-) (Leishmanolysin-like peptidase 2),623,A0A1D5NSK0
+A0A1D5NSM8,svep1,"Sushi, von Willebrand factor type A, EGF and pentraxin domain-containing protein 1 (Polydom)",3615,
+A0A1Z2R986,eng,Endoglin,559,A0A1Z2R986
+A0A286Y9D1,phf14,PHD finger protein 14,914,A0A286Y9D1
+A0A2R8Q1W5,keap1b,Kelch-like ECH-associated protein 1B,587,A0A2R8Q1W5
+A0A2R8QCI3,ccdc88c,Protein Daple (Coiled-coil domain-containing protein 88C),2023,A0A2R8QCI3
+A0A2R8QF68,grik2,"Glutamate receptor ionotropic, kainate 2 (GluK2)",908,A0A2R8QF68
+A0A2R9YJI3,gpr22a,G protein-coupled receptor 22,460,A0A2R9YJI3
+A0A386CAB9,nlrp1,"NACHT, LRR and PYD domains-containing protein 1 homolog (EC 3.4.-.-) [Cleaved into: NACHT, LRR and PYD domains-containing protein 1, C-terminus (NLRP1-CT); NACHT, LRR and PYD domains-containing protein 1, N-terminus (NLRP1-NT)]",1355,A0A386CAB9
+A0A8M1NHK4,rbm47,RNA-binding protein 47 (RNA-binding motif protein 47),600,A0A8M1NHK4
+A0A8M1PLI9,aldh7a1,Alpha-aminoadipic semialdehyde dehydrogenase (Alpha-AASA dehydrogenase) (EC 1.2.1.31) (Aldehyde dehydrogenase family 7 member A1) (EC 1.2.1.3) (Betaine aldehyde dehydrogenase) (EC 1.2.1.8),540,A0A8M1PLI9
+A0A8M2BID5,dspa,Desmoplakin-A (Desmoplakin isoform X2),2059,A0A8M2BID5
+A0A8M3B525,brcc3,Lys-63-specific deubiquitinase (EC 3.4.19.-),287,A0A8M3B525
+A0A8M9PDM1,spaca6,Sperm acrosome membrane-associated protein 6,317,A0A8M9PDM1
+A0A8M9PFP2,clstn3,Calsyntenin-3,956,A0A8M9PFP2
+A0A8M9PQ61,dspb,Desmoplakin-B (Desmoplakin isoform X1),2207,A0A8M9PQ61
+A0JMD4,tpcn2,Two pore channel protein 2 (Two pore calcium channel protein 2) (Voltage-dependent calcium channel protein TPC2),774,A0JMD4
+A0JMQ9,zranb1b,Ubiquitin thioesterase zranb1-B (EC 3.4.19.12) (Zinc finger Ran-binding domain-containing protein 1-B),716,A0JMQ9
+A0JPF9,crppa,D-ribitol-5-phosphate cytidylyltransferase (EC 2.7.7.40) (2-C-methyl-D-erythritol 4-phosphate cytidylyltransferase-like protein) (Isoprenoid synthase domain-containing protein),462,A0JPF9
+A0MGZ7,hs6st3b,Heparan-sulfate 6-O-sulfotransferase 3-B (HS 6-OST-3-B) (EC 2.8.2.-),419,A0MGZ7
+A0MTA1,apex1,DNA repair nuclease APEX1 (EC 3.1.11.2) (EC 3.1.21.-) (APEX nuclease) (APEN) (Apurinic-apyrimidinic endonuclease 1) (AP endonuclease 1) (zAP1),310,A0MTA1
+A0T2N3,aplnrb,Apelin receptor B (Angiotensin II receptor-like 1b) (Angiotensin receptor-like 1b) (G protein-coupled receptor APJ B) (Protein grinch),359,A0T2N3
+A1A5H8,yes1,Tyrosine-protein kinase yes (EC 2.7.10.2) (p61-Yes),546,A1A5H8
+A1L1N5,hnf1ba,Hepatocyte nuclear factor 1-beta-A (HNF-1-beta-A) (HNF-1B-A) (Hepatocyte nuclear factor 1-beta-2) (HNF-1B-2) (Transcription factor 2) (TCF-2) (Variant hepatic nuclear factor 1) (vHNF1),559,A1L1N5
+A1L1V4,loxl2b,Lysyl oxidase homolog 2B (EC 1.4.3.13) (Lysyl oxidase-like protein 2B),762,A1L1V4
+A1L293,ptpmt1,"Phosphatidylglycerophosphatase and protein-tyrosine phosphatase 1 (EC 3.1.3.27) (Protein-tyrosine phosphatase mitochondrial 1) (EC 3.1.3.16, EC 3.1.3.48)",183,A1L293
+A1L2G3,bap1,Ubiquitin carboxyl-terminal hydrolase BAP1 (EC 3.4.19.12) (BRCA1-associated protein 1),755,A1L2G3
+A1XQX0,nrxn1a,Neurexin-1a (Neurexin Ia-alpha) (Neurexin-1a-alpha),1491,A1XQX0
+A1XQX8,nrxn3a,Neurexin-3a (Neurexin IIIa-alpha) (Neurexin-3a-alpha),1697,A1XQX8
+A1XQY1,nrxn3b,Neurexin-3b (Neurexin IIIb-alpha) (Neurexin-3b-alpha),1686,A1XQY1
+A1YB07,amotl2a,Angiomotin-like 2a,721,A1YB07
+A2BGM5,foxn4,Forkhead box protein N4,550,A2BGM5
+A2BIE7,tapt1,Transmembrane anterior posterior transformation protein 1 homolog,567,A2BIE7
+A2CEH0,poc1b,POC1 centriolar protein homolog B (WD repeat domain 51B),490,A2CEH0
+A2CEI6,piwil2,Piwi-like protein 2 (EC 3.1.26.-),1046,A2CEI6
+A2SWM2,spns2,Sphingosine-1-phosphate transporter SPNS2 (Protein spinster homolog 2) (Protein two of hearts),504,A2SWM2
+A2T928,rargb,Retinoic acid receptor gamma-B (RAR-gamma-B) (Nuclear receptor subfamily 1 group B member 3-B),489,A2T928
+A3KNA7,srebf2,Sterol regulatory element-binding protein 2 (SREBP-2) (Sterol regulatory element-binding transcription factor 2) [Cleaved into: Processed sterol regulatory element-binding protein 2 (Transcription factor SREBF2)],1099,A3KNA7
+A3KNL5,atp5if1a,"ATPase inhibitor A, mitochondrial (ATP synthase F1 subunit epsilon A) (Inhibitor of F(1)F(o)-ATPase A) (IF(1) A) (IF1 A) (Protein pinotage)",105,A3KNL5
+A3KPA0,jam3b,Junctional adhesion molecule 3B (Jam3b) (Junctional adhesion molecule C) (JAM-C),302,A3KPA0
+A3KPA3,naa60,N-alpha-acetyltransferase 60 (EC 2.3.1.259) (Histone acetyltransferase type B protein 4) (HAT4) (EC 2.3.1.48) (N-acetyltransferase 15) (N-alpha-acetyltransferase F) (NatF),242,A3KPA3
+A3KPP3,rangrf,Ran guanine nucleotide release factor (RanGNRF) (Ran-binding protein MOG1),183,A3KPP3
+A3KPQ7,cemip2,Cell surface hyaluronidase (EC 3.2.1.35) (Cell migration-inducing hyaluronidase 2) (Protein frozen ventricle) (Protein wickham) (Transmembrane protein 2),1378,A3KPQ7
+A3KPW9,Bag6,Large proline-rich protein BAG6 (BCL2-associated athanogene 6) (HLA-B-associated transcript 3),1160,A3KPW9
+A3KQ86,pllp,Plasmolipin (Plasma membrane proteolipid),173,A3KQ86
+A3KQH2,drc9,Dynein regulatory complex protein 9 (IQ domain-containing protein G),346,A3KQH2
+A3QJU3,coq8b,"Atypical kinase COQ8B, mitochondrial (EC 2.7.-.-) (AarF domain-containing protein kinase 4) (Coenzyme Q protein 8B)",624,A3QJU3
+A4IG62,supv3l1,"ATP-dependent RNA helicase SUPV3L1, mitochondrial (EC 3.6.4.13) (Suppressor of var1 3-like protein 1) (SUV3-like protein 1)",763,A4IG62
+A5HAK0,rnasel3,Ribonuclease-like 3 (RNase ZF-3) (RNase-like 3) (ZF-RNase-3) (EC 3.1.27.-) (Dr-RNase 1) [Cleaved into: N-terminal peptide; LF-ZF3],149,A5HAK0
+A5PL98,sdhb,"Succinate dehydrogenase [ubiquinone] iron-sulfur subunit, mitochondrial (EC 1.3.5.1) (Iron-sulfur subunit of complex II) (Ip) (Malate dehydrogenase [quinone] iron-sulfur subunit) (EC 1.1.5.-)",280,A5PL98
+A5PN09,usp20,Ubiquitin carboxyl-terminal hydrolase 20 (EC 3.4.19.12) (Deubiquitinating enzyme 20) (Ubiquitin thioesterase 20) (Ubiquitin-specific-processing protease 20),911,A5PN09
+A5PN28,otol1a,Otolin-1-A (zOtolin1),489,A5PN28
+A5WVX9,zdhhc17,Palmitoyltransferase ZDHHC17 (EC 2.3.1.225) (Acyltransferase ZDHHC17) (EC 2.3.1.-) (DHHC domain-containing cysteine-rich protein 17) (Zinc finger DHHC domain-containing protein 17),620,A5WVX9
+A7MBL8,pkn2,Serine/threonine-protein kinase N2 (EC 2.7.11.13) (PKN gamma) (Protein kinase C-like 2) (Protein-kinase C-related kinase 2),977,A7MBL8
+A7MBS7,thsd7aa,Thrombospondin type-1 domain-containing protein 7A,1686,A7MBS7
+A7YE96,ift70a,Intraflagellar transport protein 70A (Protein fleer) (Tetratricopeptide repeat protein 30A) (TPR repeat protein 30A),651,A7YE96
+A8C984,mylk3,Myosin light chain kinase 3 (EC 2.7.11.18) (Cardiac-MyBP-C-associated Ca/CaM kinase) (Cardiac-MLCK),715,A8C984
+A8CVX7,ttll6,Tubulin polyglutamylase ttll6 (EC 6.3.2.-) (Protein polyglutamylase TTLL6) (Tubulin tyrosine ligase-like family member 6),778,A8CVX7
+A8DZE6,wtip,Wilms tumor protein 1-interacting protein homolog (WT1-interacting protein homolog),648,A8DZE6
+A8HAL1,usp16,Ubiquitin carboxyl-terminal hydrolase 16 (EC 3.4.19.12) (Deubiquitinating enzyme 16) (Ubiquitin thioesterase 16) (Ubiquitin-specific-processing protease 16),815,A8HAL1
+A8WGA0,cyp27c1,"Cytochrome P450 27C1 (EC 1.14.19.53) (All-trans retinol 3,4-desaturase)",540,A8WGA0
+A8WGB1,ccbe1,Collagen and calcium-binding EGF domain-containing protein 1 (Full of fluid protein),401,A8WGB1
+A8WIP6,cdk20,Cyclin-dependent kinase 20 (EC 2.7.11.22) (Cell cycle-related kinase) (Cell division protein kinase 20),344,A8WIP6
+A9C3R8,rpe65c,Retinal Mueller cells isomerohydrolase (EC 3.1.1.64) (All-trans-retinyl ester 13-cis isomerohydrolase C) (EC 3.1.1.90) (All-trans-retinylester 11-cis isomerohydrolase C) (Lutein isomerase) (Meso-zeaxanthin isomerase) (EC 5.3.3.22) (Retinal pigment epithelium-specific 65 kDa protein homolog C) (RPE56c),532,A9C3R8
+A9C3R9,rpe65b,All-trans-retinyl ester 13-cis isomerohydrolase (13cIMH) (EC 3.1.1.90) (Lutein isomerase) (Meso-zeaxanthin isomerase) (EC 5.3.3.22) (Retinal pigment epithelium-specific 65 kDa protein homolog B) (RPE56b),532,A9C3R9
+A9ULR9,kctd13,BTB/POZ domain-containing adapter for CUL3-mediated RhoA degradation protein 1 (BTB/POZ domain-containing protein KCTD13),330,A9ULR9
+B0BF33,pkp2,Plakophilin-2,815,B0BF33
+B0JYH6,nectin1b,Nectin 1b,541,B0JYH6
+B0R0I6,chd8,ATP-dependent chromatin remodeler CHD8 (EC 3.6.4.-) (Chromo domain-containing protein 8) (CHD-8),2511,B0R0I6
+B0S5G3,clstn2a,Calsyntenin-2,937,B0S5G3
+B0S5N4,plxna3,Plexin A3,1892,B0S5N4
+B0S6J3,srgap2,SLIT-ROBO Rho GTPase-activating protein 2 (srGAP2),1100,B0S6J3
+B0S6T2,slc15a2,Solute carrier family 15 member 2 (Peptide transporter 2) (PEPT2),719,B0S6T2
+B0V1P1,mc4r,Melanocortin receptor 4 (MC4-R),326,B0V1P1
+B1Q006,mboat4,Membrane-bound ghrelin O-acyltransferase mboat4 (EC 2.3.1.-) (Membrane-bound O-acyltransferase domain-containing protein 4),415,B1Q006
+B2ZFP3,smarcal1,SNF2 related chromatin remodeling annealing helicase 1 (EC 3.6.4.-) (EC 5.6.2.-) (HepA-related protein) (SWI/SNF-related matrix-associated actin-dependent regulator of chromatin subfamily A-like protein 1) (Sucrose nonfermenting protein 2-like 1),807,B2ZFP3
+B3DH20,dnaaf11,Dynein axonemal assembly factor 11 (DNAAF11) (Leucine-rich repeat-containing 6-like protein) (Leucine-rich repeat-containing protein 6) (Protein tilB homolog) (Seahorse),440,B3DH20
+B3DIG4,fzd5,Frizzled-5 (Fz-5),592,B3DIG4
+B3DIV9,klhl40a,Kelch-like protein 40a (Kelch repeat and BTB domain-containing protein 5a),612,B3DIV9
+B3DJT0,sart3,"Spliceosome associated factor 3, U4/U6 recycling protein (Squamous cell carcinoma antigen recognized by T-cells 3) (SART-3)",951,B3DJT0
+B3DK56,ptpru,Receptor-type tyrosine-protein phosphatase U (R-PTP-U) (EC 3.1.3.48) (Receptor-type protein-tyrosine phosphatase psi) (R-PTP-psi),1444,B3DK56
+B3F211,igfbp2b,Insulin-like growth factor-binding protein 2-B (IGF-binding protein 2-B) (IGFBP-2-B) (IGFBP-2b),265,B3F211
+B3G515,gper1,G protein-coupled estrogen receptor 1 (G protein-coupled receptor 30),353,B3G515
+B5DE31,ybx1,Y-box-binding protein 1 (YB-1) (ZfY1) (Y-box transcription factor),310,B5DE31
+B6ZK76,il1rapl1a,Interleukin-1 receptor accessory protein-like 1-A (EC 3.2.2.6),701,B6ZK76
+B6ZK77,il1rapl1b,Interleukin-1 receptor accessory protein-like 1-B (EC 3.2.2.6),700,B6ZK77
+B7SXM5,ier2,Immediate early response gene 2 protein,180,B7SXM5
+B7ZC96,kcnma1a,"Calcium-activated potassium channel subunit alpha-1a (BK channel) (Potassium large conductance calcium-activated channel, subfamily M, alpha member 1a) (Slo1a) (Slowpoke homolog)",1184,B7ZC96
+B8A4F0,zdhhc16a,Palmitoyltransferase ZDHHC16A (EC 2.3.1.225) (Zinc finger DHHC domain-containing protein 16A) (DHHC-16A),387,B8A4F0
+B8A4W9,loxl3b,Lysyl oxidase homolog 3B (EC 1.4.3.-) (EC 1.4.3.13) (Lysyl oxidase-like protein 3B),807,B8A4W9
+B8A5S6,amotl2b,Angiomotin-like 2b,681,B8A5S6
+B8JI71,eys,Protein eyes shut homolog,2904,
+B8JLQ9,cpo,Carboxypeptidase O (EC 3.4.17.-),363,B8JLQ9
+B8PYG1,nsmf,NMDA receptor synaptonuclear signaling and neuronal migration factor (Nasal embryonic luteinizing hormone-releasing hormone factor) (Nasal embryonic LHRH factor),570,B8PYG1
+B8XY56,rnaset2,Ribonuclease T2 (EC 4.6.1.19) (RNase Dre2),240,B8XY56
+C6KFA3,adgrg6,"Adhesion G protein-coupled receptor G6 (G protein-coupled receptor 126) [Cleaved into: Adhesion G protein-coupled receptor G6, N-terminal fragment (ADGRG6 N-terminal fragment) (ADGRG6-NTF); Adhesion G protein-coupled receptor G6, C-terminal fragment (ADGRG6 C-terminal fragment) (ADGRG6-CTF)]",1185,C6KFA3
+D2CLZ9,atoh8,Transcription factor atoh8 (Atonal bHLH transcription factor 8) (Protein atonal homolog 8),266,D2CLZ9
+E4W698,oxtrb,Oxytocin receptor B (OT-R-B) (Isotocin receptor-like 1) (Itnpr-like 1),382,E4W698
+E4W699,oxtra,Oxytocin receptor A (OT-R-A) (Isotocin receptor-like 2) (Itnpr-like 2),388,E4W699
+E7EZ53,gal,Galanin peptides [Cleaved into: Galanin; Galanin message-associated peptide],118,E7EZ53
+E7EZF3,uhrf1,E3 ubiquitin-protein ligase UHRF1 (EC 2.3.2.27) (Ubiquitin-like PHD and RING finger domain-containing protein 1) (Ubiquitin-like-containing PHD and RING finger domains protein 1),776,E7EZF3
+E7EZG2,myo9aa,Unconventional myosin-IXAa (Myosin IXAa),2522,E7EZG2
+E7F1H9,ythdf2,YTH domain-containing family protein 2,613,E7F1H9
+E7F1U2,dnmbp,Dynamin-binding protein (Scaffold protein Tuba),1673,E7F1U2
+E7F3F0,myo9ab,Unconventional myosin-IXAb (Myosin IXAb),2286,E7F3F0
+E7F3I6,clp1,Polyribonucleotide 5'-hydroxyl-kinase Clp1 (EC 2.7.1.78) (Polyadenylation factor Clp1) (Polynucleotide kinase Clp1) (Pre-mRNA cleavage complex II protein Clp1),443,E7F3I6
+E7F4N7,sting1,Stimulator of interferon genes protein (STING) (Transmembrane protein 173),398,E7F4N7
+E7F4V8,pex2,Peroxisome biogenesis factor 2 (EC 2.3.2.27) (EC 2.3.2.36) (Peroxin-2),312,E7F4V8
+E7F568,cobl,Protein cordon-bleu,1343,E7F568
+E7F590,vps41,Vacuolar protein sorting-associated protein 41 homolog,854,E7F590
+E7F594,gpr137ba,G protein-coupled receptor 137Ba,373,E7F594
+E7F654,nol9,Polynucleotide 5'-hydroxyl-kinase NOL9 (EC 2.7.1.78) (Nucleolar protein 9),713,E7F654
+E7F6F7,abcb7,"Iron-sulfur clusters transporter ABCB7, mitochondrial (ATP-binding cassette sub-family B member 7, mitochondrial)",743,E7F6F7
+E7F7X0,lmod3,Leiomodin-3,670,E7F7X0
+E7F9L8,myo1d,Unconventional myosin-Id (Myosin 1d) (Myosin1D),1004,E7F9L8
+E7FAG6,ambra1a,Activating molecule in BECN1-regulated autophagy protein 1A,1315,E7FAG6
+E7FAM5,trim71,E3 ubiquitin-protein ligase TRIM71 (EC 2.3.2.27) (Protein lin-41 homolog) (RING-type E3 ubiquitin transferase TRIM71) (Tripartite motif-containing protein 71),824,E7FAM5
+E7FB98,ubiad1,UbiA prenyltransferase domain-containing protein 1 (EC 2.5.1.-) (EC 2.5.1.39) (Protein barolo) (Protein reddish),336,E7FB98
+E7FBF7,fcho1,F-BAR domain only protein 1,897,E7FBF7
+E7FBY6,adgra2,Adhesion G protein-coupled receptor A2 (G protein-coupled receptor 124),1367,E7FBY6
+E7FCP8,nags,"N-acetylglutamate synthase, mitochondrial (EC 2.3.1.1) [Cleaved into: N-acetylglutamate synthase, mature form (NAGS-M); N-acetylglutamate synthase, conserved domain form (NAGS-C)]",527,E7FCP8
+E7FE13,lgr4,Leucine-rich repeat-containing G protein-coupled receptor 4,971,E7FE13
+E7FEL0,gpr4,G protein-coupled receptor 4 (zGPR4),373,E7FEL0
+E7FFT2,tmc2a,Transmembrane channel-like protein 2-A,916,E7FFT2
+E9QBI7,oma1,"Metalloendopeptidase OMA1, mitochondrial (zfoma1) (EC 3.4.24.-) (Overlapping with the m-AAA protease 1 homolog)",478,E9QBI7
+E9QDC5,hwa,Protein huluwa,294,E9QDC5
+E9QG68,usp45,Ubiquitin carboxyl-terminal hydrolase 45 (EC 3.4.19.12) (Ubiquitin specific peptidase 45),803,E9QG68
+E9QIN8,klhl41a,Kelch-like protein 41a (Kelch repeat and BTB domain-containing protein 10b),599,E9QIN8
+E9QJ30,klhl40b,Kelch-like protein 40b (Kelch repeat and BTB domain-containing protein 5b),618,E9QJ30
+E9QJ73,cxcr3.2,C-X-C chemokine receptor type 3-2,378,E9QJ73
+F1Q4R9,meox1,Homeobox protein MOX-1 (Mesenchyme homeobox 1) (Protein choker),253,F1Q4R9
+F1Q506,snx10a,Sorting nexin-10A,229,F1Q506
+F1Q749,dkc1,H/ACA ribonucleoprotein complex subunit DKC1 (EC 5.4.99.-) (Dyskerin),506,F1Q749
+F1Q8K0,rad54l,DNA repair and recombination protein RAD54-like (EC 3.6.4.-),738,F1Q8K0
+F1Q8R9,pomt2,Protein O-mannosyl-transferase 2 (EC 2.4.1.109),756,F1Q8R9
+F1Q8X5,fermt2,Fermitin family homolog 2 (Kindlin-2),684,F1Q8X5
+F1QB30,amfra,E3 ubiquitin-protein ligase AMFR (EC 2.3.2.36) (Autocrine motility factor receptor) (AMF receptor),620,F1QB30
+F1QBY1,nipblb,Nipped-B-like protein B,2876,
+F1QC45,rp2,Protein XRP2,376,F1QC45
+F1QCP6,tafazzin,Tafazzin (Taz) (EC 2.3.1.-),262,F1QCP6
+F1QCV2,hdac10,Polyamine deacetylase HDAC10 (EC 3.5.1.48) (EC 3.5.1.62) (Histone deacetylase 10),675,F1QCV2
+F1QDF8,foxj1a,Forkhead box protein J1-A,458,F1QDF8
+F1QEB7,wdr11,WD repeat-containing protein 11,1239,F1QEB7
+F1QEG2,klhl41b,Kelch-like protein 41b (Kelch repeat and BTB domain-containing protein 10b),605,F1QEG2
+F1QF89,pomt1,Protein O-mannosyl-transferase 1 (EC 2.4.1.109),720,F1QF89
+F1QG30,smpd5,Sphingomyelin phosphodiesterase 5 (EC 3.1.4.12) (Mitochondrial neutral sphingomyelinase) (mtnSMase),545,F1QG30
+F1QGH7,ctnnb1,Catenin beta-1 (Beta-catenin),780,F1QGH7
+F1QGZ6,melk,Maternal embryonic leucine zipper kinase (zMelk) (EC 2.7.11.1) (Protein kinase PK38),676,F1QGZ6
+F1QLG5,adnpa,Activity-dependent neuroprotective protein a (ADNP homeobox protein a),969,F1QLG5
+F1QLP1,hsd11b2,11-beta-hydroxysteroid dehydrogenase type 2 (11-DH2) (11-beta-HSD2) (11-beta-hydroxysteroid dehydrogenase type II) (11-HSD type II) (11-beta-HSD type II) (Corticosteroid 11-beta-dehydrogenase isozyme 2) (NAD-dependent 11-beta-hydroxysteroid dehydrogenase),414,F1QLP1
+F1QLR3,fxr1,RNA-binding protein FXR1 (FMR1 autosomal homolog 1),622,F1QLR3
+F1QLY4,roraa,Nuclear receptor ROR-alpha A (Retinoid-related orphan receptor alpha 2) (Retinoid-related orphan receptor-alpha A),468,F1QLY4
+F1QN48,fam53b,Protein FAM53B (Protein simplet),379,F1QN48
+F1QN54,kif3b,Kinesin-like protein KIF3B,775,F1QN54
+F1QNW4,drc4,Dynein regulatory complex subunit 4 (Growth arrest-specific protein 8) (GAS-8),475,F1QNW4
+F1QQA8,znf219,Zinc finger protein 219 (Zinc finger protein 219-like),1095,F1QQA8
+F1QQC3,loxl2a,Lysyl oxidase homolog 2A (EC 1.4.3.13) (Lysyl oxidase-like protein 2A),737,F1QQC3
+F1QQI2,spx,Spexin prohormone 1 (Neuropeptide Q) (Spexin hormone) [Cleaved into: Spexin-1 (Spexin-14)],102,F1QQI2
+F1QR43,glceb,D-glucuronyl C5-epimerase B (EC 5.1.3.17),586,F1QR43
+F1QSQ0,dsc2l,Desmocollin 2-like protein,934,F1QSQ0
+F1QU13,alpk2,Alpha-protein kinase 2 (EC 2.7.11.1) (Heart alpha-protein kinase),1966,F1QU13
+F1QVU0,ltk,Tyrosine-protein kinase receptor (EC 2.7.10.1) (Anaplastic lymphoma kinase 1) (alk-1) (Protein moonstone) (mne) (Protein shady) (shd),1530,F1QVU0
+F1QWA8,sarm1,NAD(+) hydrolase SARM1 (NADase SARM1) (EC 3.2.2.6) (NADP(+) hydrolase SARM1) (EC 3.2.2.-) (Sterile alpha and TIR motif-containing protein 1),713,F1QWA8
+F1QXD3,zdhhc15b,Palmitoyltransferase ZDHHC15B (EC 2.3.1.225) (Acyltransferase ZDHHC15B) (EC 2.3.1.-) (Zinc finger DHHC domain-containing protein 15B),332,F1QXD3
+F1QXM5,ldhd,"D-lactate dehydrogenase, mitochondrial (DLD) (Lactate dehydrogenase D) (EC 1.1.98.-)",497,F1QXM5
+F1QZ88,e2f8,Transcription factor E2F8 (E2F-8),917,F1QZ88
+F1R237,tdrd6,Tudor domain-containing 6,2117,F1R237
+F1R2J1,pnx,Homeobox protein pnx (Posterior neuron-specific homeobox),182,F1R2J1
+F1R345,ddx11,ATP-dependent DNA helicase DDX11 (EC 5.6.2.3) (DEAD/H-box protein 11) (DNA 5'-3' helicase DDX11),890,F1R345
+F1R4C4,pias4a,E3 SUMO-protein ligase PIAS4-A (EC 2.3.2.27) (Protein inhibitor of activated STAT protein 4),505,F1R4C4
+F1R4U0,slc25a1b,"Tricarboxylate transport protein B, mitochondrial (Citrate transport protein B) (Solute carrier family 25 member 1b)",317,F1R4U0
+F1R520,clstn1,Calsyntenin-1,954,F1R520
+F1R5H6,brd4,Bromodomain-containing protein 4,1444,F1R5H6
+F1R777,mettl3,N(6)-adenosine-methyltransferase subunit METTL3 (EC 2.1.1.348) (N(6)-adenosine-methyltransferase 70 kDa subunit) (MT-A70),584,F1R777
+F1R8P4,glra2,Glycine receptor subunit alpha-2,449,F1R8P4
+F1R8Z9,foxj1b,Forkhead box protein J1-B,442,F1R8Z9
+F1RA39,mical2b,[F-actin]-monooxygenase mical2b (EC 1.14.13.225) (Molecule interacting with CasL protein 2B) (MICAL-2),1679,F1RA39
+F1RAX4,stra6,Receptor for retinol uptake stra6 (Stimulated by retinoic acid gene 6 protein homolog),670,F1RAX4
+F1RBC8,abcd1,ATP-binding cassette sub-family D member 1 (EC 3.1.2.-) (EC 7.6.2.-) (Adrenoleukodystrophy protein) (ALDP),766,F1RBC8
+F1RCP1,becn1,Beclin-1,447,F1RCP1
+F1RCY6,upf1,Regulator of nonsense transcripts 1 (EC 5.6.2.3) (EC 5.6.2.5) (ATP-dependent helicase RENT1) (Double-stranded nucleic acid 5'-3' helicase Upf1) (Nonsense mRNA reducing factor 1) (NORF1) (Up-frameshift suppressor 1 homolog),1100,F1RCY6
+F1RD40,mycbp2,E3 ubiquitin-protein ligase MYCBP2 (EC 2.3.2.33) (Myc-binding protein 2) (Protein Esrom),4574,
+F1RD85,loxl3a,Lysyl oxidase homolog 3A (EC 1.4.3.-) (EC 1.4.3.13) (Lysyl oxidase-like protein 3A),739,F1RD85
+F1RDG9,fynb,Tyrosine-protein kinase fynb (EC 2.7.10.2) (Proto-oncogene c-Fynb),544,F1RDG9
+F1RE08,ptgis,Prostacyclin synthase (EC 5.3.99.4) (Hydroperoxy icosatetraenoate dehydratase) (EC 4.2.1.152) (Prostaglandin I2 synthase) (PGIS),480,F1RE08
+F1RE57,zdhhc3a,Palmitoyltransferase ZDHHC3-A (EC 2.3.1.225) (Acyltransferase ZDHHC3A) (EC 2.3.1.-) (Zinc finger DHHC domain-containing protein 3),316,F1RE57
+F1RET2,smyd5,Protein-lysine N-trimethyltransferase SMYD5 (EC 2.1.1.-) (SET and MYND domain-containing protein 5) ([histone H3]-lysine20 N-trimethyltransferase SMYD5) (EC 2.1.1.372) ([histone H4]-lysine36 N-trimethyltransferase SMYD5) (EC 2.1.1.359),415,F1RET2
+F1REV3,krit1,Krev interaction trapped protein 1 (Krev interaction trapped 1) (Cerebral cavernous malformations 1 protein homolog) (Santa),740,F1REV3
+F5HSE3,nipbla,Nipped-B-like protein A,2381,F5HSE3
+F6NXI9,trnt1,"CCA tRNA nucleotidyltransferase 1, mitochondrial (EC 2.7.7.72)",431,F6NXI9
+F8W2M1,hace1,E3 ubiquitin-protein ligase HACE1 (EC 2.3.2.26) (HECT domain and ankyrin repeat-containing E3 ubiquitin-protein ligase 1) (HECT-type E3 ubiquitin transferase HACE1),904,F8W2M1
+F8W2M8,tpp1,Tripeptidyl-peptidase 1 (TPP-1) (EC 3.4.14.9) (Tripeptidyl aminopeptidase) (Tripeptidyl-peptidase I) (TPP-I),557,F8W2M8
+F8W3R9,alk,ALK tyrosine kinase receptor (EC 2.7.10.1) (Anaplastic lymphoma kinase 2) (alk-2) (Anaplastic lymphoma kinase homolog),1705,F8W3R9
+F8W3X3,pcdh19,Protocadherin-19,1088,F8W3X3
+F8W463,p2rx4a,P2X purinoceptor 4a,389,F8W463
+F8W4H9,mrap2a,Melanocortin-2 receptor accessory protein 2A (zMRAP2a),217,F8W4H9
+G8XYX6,slc16a2,Monocarboxylate transporter 8 (MCT 8) (Solute carrier family 16 member 2),526,G8XYX6
+H0WFA5,buc,Bucky ball (buc) (Prion-like protein Bucky ball),639,H0WFA5
+H2EQR6,dsg2.1,Desmoglein-2.1,1142,H2EQR6
+L7YAI7,b4gat1,"Beta-1,4-glucuronyltransferase 1 (EC 2.4.1.-) (I-beta-1,3-N-acetylglucosaminyltransferase) (N-acetyllactosaminide beta-1,3-N-acetylglucosaminyltransferase) (Poly-N-acetyllactosamine extension enzyme) (UDP-GlcNAc:betaGal beta-1,3-N-acetylglucosaminyltransferase 1)",431,L7YAI7
+O12990,jak1,Tyrosine-protein kinase JAK1 (EC 2.7.10.2) (Janus kinase 1) (JAK-1),1153,O12990
+O13033,rag1,V(D)J recombination-activating protein 1 (RAG-1) [Includes: Endonuclease RAG1 (EC 3.1.-.-); E3 ubiquitin-protein ligase RAG1 (EC 2.3.2.27) (RING-type E3 ubiquitin transferase RAG1)],1057,O13033
+O13034,rag2,V(D)J recombination-activating protein 2 (RAG-2),530,O13034
+O13146,epha3,Ephrin type-A receptor 3 (EC 2.7.10.1) (EPH-like kinase 1) (Tyrosine-protein kinase receptor ZEK1),981,O13146
+O13147,ephb3,Ephrin type-B receptor 3 (EC 2.7.10.1) (EPH-like kinase 3) (Tyrosine-protein kinase receptor ZEK3),500,O13147
+O13148,epha4a,Ephrin type-A receptor 4a (EC 2.7.10.1) (EPH-like kinase 2) (Tyrosine-protein kinase receptor ZEK2),292,O13148
+O13166,tle3a,Transducin-like enhancer protein 3-A (Groucho-related protein grg2) (Protein groucho-2),761,O13166
+O42115,arxa,Aristaless-related homeobox protein A (ARX-A),453,O42115
+O42145,cyp19a1a,Aromatase (EC 1.14.14.14) (CYPXIX) (Cytochrome P-450AROM) (Cytochrome P450 19A1a) (Estrogen synthase),509,O42145
+O42182,fbln1,Fibulin-1 (FIBL-1),681,O42182
+O42202,neurod1,Neurogenic differentiation factor 1 (NeuroD) (NeuroD1),350,O42202
+O42222,mstnb,Growth/differentiation factor 8 (GDF-8) (Myostatin) (Myostatin-1) (zfMSTN-1) (Myostatin-B),374,O42222
+O42248,gnb2l1,Small ribosomal subunit protein RACK1 (Guanine nucleotide-binding protein subunit beta-2-like 1) (Receptor of activated protein kinase C) (RACK),317,O42248
+O42250,vsx1,Visual system homeobox 1 (Transcription factor VSX1),344,O42250
+O42354,mdm2,E3 ubiquitin-protein ligase Mdm2 (EC 2.3.2.27) (Double minute 2 protein) (RING-type E3 ubiquitin transferase Mdm2) (p53-binding protein Mdm2),445,O42354
+O42358,rx3,Retinal homeobox protein Rx3,292,O42358
+O42363,apoa1a,Apolipoprotein A-Ia (Apo-AIa) (ApoA-Ia) (Apolipoprotein A1) [Cleaved into: Proapolipoprotein A-I (ProapoA-I)],262,O42363
+O42364,apoeb,Apolipoprotein Eb (Apo-Eb),281,O42364
+O42477,vsx2,Visual system homeobox 2 (Ceh-10 homeodomain-containing homolog) (Homeobox protein ALX) (Homeobox protein CHX10) (Transcription factor VSX2),393,O42477
+O42606,neurog1,Neurogenin-1 (NGN-1) (Neurogenic differentiation factor 3) (NeuroD3) (Neurogenin-related protein 1),208,O42606
+O57341,fgf8a,Fibroblast growth factor 8 (FGF-8),210,O57341
+O57460,tll1,Dorsal-ventral patterning tolloid-like protein 1 (EC 3.4.24.-) (Mini fin protein),1022,O57460
+O57472,chd,Chordin (Protein chordino),940,O57472
+O57474,gja1,Gap junction alpha-1 protein (Connexin-43) (Cx43) (Short fin protein),381,O57474
+O57521,hsp90ab1,Heat shock protein HSP 90-beta,725,O57521
+O73682,vegfaa,Vascular endothelial growth factor A-A (VEGF-A-A),188,O73682
+O73791,tek,"Angiopoietin-1 receptor (EC 2.7.10.1) (TEK tyrosine kinase, endothelial) (Tyrosine kinase with Ig and EGF homology domains-2) (Tyrosine-protein kinase receptor Tie-2)",1116,O73791
+O73792,tie1,Tyrosine-protein kinase receptor Tie-1 (EC 2.7.10.1),184,O73792
+O73864,wnt11,Protein Wnt-11,354,O73864
+O73872,sod1,Superoxide dismutase [Cu-Zn] (EC 1.15.1.1) (EC 1.8.-.-) (Hydrogen sulfide oxidase),154,O73872
+O73874,efnb2a,Ephrin-B2a,332,O73874
+O73875,ephb4a,Ephrin type-B receptor 4a (EC 2.7.10.1) (Eph receptor B4a) (Eph-like receptor tyrosine kinase rtk5),987,O73875
+O73878,ephb4b,Ephrin type-B receptor 4b (EC 2.7.10.1) (Eph receptor B4b) (Eph-like receptor tyrosine kinase rtk8),976,O73878
+O93409,mylpfa,"Myosin regulatory light chain 2, skeletal muscle isoform A (Fast skeletal myosin light chain 2) (Myosin light chain 11) (Myosin regulatory light chain 11)",169,O93409
+O93430,glra1,Glycine receptor subunit alphaZ1,444,O93430
+O93507,tal1,T-cell acute lymphocytic leukemia protein 1 homolog (TAL-1) (Stem cell protein) (zSCL),324,O93507
+P09015,eng2a,Homeobox protein engrailed-2a (Homeobox protein en-2a) (Zf-En-2),265,P09015
+P0CF52,jhdm1db,Lysine-specific demethylase 7B (DrKDM7b) (EC 1.14.11.-) (JmjC domain-containing histone demethylation protein 1D-B),577,P0CF52
+P0CH95,phf8,Histone lysine demethylase PHF8 (EC 1.14.11.-) (EC 1.14.11.65) (PHD finger protein 8) (zPHF8) ([histone H3]-dimethyl-L-lysine(9) demethylase PHF8),1032,P0CH95
+P0CI65,nphp3,Nephrocystin-3,1303,P0CI65
+P0DM64,mrap2b,Melanocortin-2 receptor accessory protein 2B (zMRAP2b),199,P0DM64
+P0DMC2,apela,Apelin receptor early endogenous ligand (Protein Elabela) (ELA) (Protein Toddler),58,P0DMC2
+P0DOC7,npas4l,Neuronal PAS domain-containing protein 4-like (Protein cloche),647,P0DOC7
+P0DPQ9,bncr,Protein Bouncer,125,P0DPQ9
+P24257,wnt1,Protein Wnt-1,370,P24257
+P26630,pax6a,Paired box protein Pax-6 (Pax[Zf-a]),437,P26630
+P26632,egr1,Early growth response protein 1 (EGR-1) (Zinc finger protein Krox-24),511,P26632
+P35359,rho,Rhodopsin,354,P35359
+P35621,dvr1,Protein DVR-1,355,P35621
+P46530,notch1a,Neurogenic locus notch homolog protein 1 (Notch 1) [Cleaved into: Notch 1 extracellular truncation (NEXT); Notch 1 intracellular domain (NICD)],2437,P46530
+P47793,wnt4a,Protein Wnt-4a,352,P47793
+P48802,fgf3,Fibroblast growth factor 3 (FGF-3) (Heparin-binding growth factor 3) (HBGF-3),256,P48802
+P50392,pla2g4a,Cytosolic phospholipase A2 (cPLA2) (Phospholipase A2 group IVA) [Includes: Phospholipase A2 (EC 3.1.1.4) (Phosphatidylcholine 2-acylhydrolase); Lysophospholipase (EC 3.1.1.5)],741,P50392
+P50574,dlx2a,Homeobox protein Dlx2a (DLX-2) (Distal-less homeobox gene 2a),270,P50574
+P50576,dlx5a,Homeobox protein Dlx5a (DLX-4) (Distal-less homeobox protein 5a),283,P50576
+P51028,wnt8a,Protein Wnt-8a,359,P51028
+P51029,wnt8b,Protein Wnt-8b,358,P51029
+P52160,myca,Transcriptional regulator Myc-A (c-Myc-A) (zc-Myc),419,P52160
+P52161,max,Protein max (Myc-associated factor X),165,P52161
+P53405,isl1,Insulin gene enhancer protein isl-1 (Islet-1),349,P53405
+P53406,isl2a,Insulin gene enhancer protein isl-2a (Islet-2A) (Insulin gene enhancer protein isl-2) (Islet-2),359,P53406
+P56224,pou3f3a,"POU domain, class 3, transcription factor 3-A (Brain-specific homeobox/POU domain protein 1.1) (Brain-1.1) (zfBrn-1.1) (Class III POU domain protein taichi) (POU domain protein 12) (ZP-12)",438,P56224
+P57094,axin1,Axin-1 (Axis inhibition protein 1),835,P57094
+P57095,axin2,Axin-2 (Axis inhibition protein 2),812,P57095
+P57102,hand2,"Heart- and neural crest derivatives-expressed protein 2 (Deciduum, heart, autonomic nervous system and neural crest derivatives-expressed protein 2) (dHAND)",208,P57102
+P57717,esr1,Estrogen receptor (ER) (ER-alpha) (Estradiol receptor) (Nuclear receptor subfamily 3 group A member 1),569,P57717
+P59015,vps18,Vacuolar protein sorting-associated protein 18 homolog,974,P59015
+P59723,hif1an,Hypoxia-inducible factor 1-alpha inhibitor (EC 1.14.11.30) (EC 1.14.11.n4) (Hypoxia-inducible factor asparagine hydroxylase),344,P59723
+P61516,hamp1,Hepcidin-1,91,P61516
+P79728,efna5b,Ephrin-A5b (AL-1) (EPH-related receptor tyrosine kinase ligand 7) (LERK-7) (ZfEPHL4),228,P79728
+P79732,rrm1,Ribonucleoside-diphosphate reductase large subunit (EC 1.17.4.1) (Ribonucleoside-diphosphate reductase subunit M1) (Ribonucleotide reductase large subunit) (Ribonucleotide reductase protein R1 class I),794,P79732
+P79734,tp53,Cellular tumor antigen p53 (Tumor suppressor p53),373,P79734
+P79735,ran,GTP-binding nuclear protein Ran (EC 3.6.5.-) (GTPase Ran) (Ras-related nuclear protein),215,P79735
+P79739,cyp26a1,Cytochrome P450 26A1 (EC 1.14.13.-) (Cytochrome P450RAI) (Retinoic acid 4-hydroxylase) (Retinoic acid-metabolizing cytochrome),492,P79739
+P79745,pou3f3b,"POU domain, class 3, transcription factor 3-B (Brain-specific homeobox/POU domain protein 1.0) (Brain-1.0) (zfBrn-1.0) (POU domain protein 1) (ZFPOU1) (POU domain protein 23) (ZP-23)",443,P79745
+P83238,bglap,Osteocalcin (Bone Gla protein) (BGP) (Gamma-carboxyglutamic acid-containing protein),45,
+P83571,ruvbl2,RuvB-like 2 (EC 3.6.4.12) (Reptin) (zReptin),463,P83571
+P85001,cep290,Centrosomal protein of 290 kDa (Cep290),2439,P85001
+P85857,gdf6a,Growth/differentiation factor 6-A (GDF-6-A) (Growth differentiation factor 6A) (Protein radar),404,P85857
+Q01702,dlx3b,Homeobox protein Dlx3b (DLX-3) (Distal-less homeobox protein 3b),269,Q01702
+Q05AK6,abhd2b,Monoacylglycerol lipase ABHD2 (EC 3.1.1.23) (2-arachidonoylglycerol hydrolase) (Abhydrolase domain-containing protein 2-B) (Acetylesterase) (EC 3.1.1.6) (Triacylglycerol lipase) (EC 3.1.1.79),422,Q05AK6
+Q06725,nr2f1a,Nuclear receptor subfamily 2 group F member 1-A (COUP transcription factor 1-A) (COUP-TFalpha-A) (zCOUP-TFI) (Seven-up related 44) (Svp[44]) (zSvp[44]) (Steroid receptor homolog SVP 44),411,Q06725
+Q06ZW3,setdb2,Histone-lysine N-methyltransferase SETDB2 (EC 2.1.1.366) (SET domain bifurcated 2),551,Q06ZW3
+Q071E0,kmt5aa,N-lysine methyltransferase KMT5A-A (EC 2.1.1.-) (Histone-lysine N-methyltransferase KMT5A-A) (EC 2.1.1.361) (Lysine-specific methylase 5A-A) (SET domain-containing protein 8-A),344,Q071E0
+Q07342,foxa2,Forkhead box protein A2 (Axial protein),409,Q07342
+Q07998,tbxta,T-box transcription factor T-A (Brachyury protein homolog-A) (No tail protein A-A) (No tail protein-A) (Protein T homolog-A) (T-box protein ZfT-A) (Zf-T-A),423,Q07998
+Q08BA4,slc38a9,Neutral amino acid transporter 9 (Solute carrier family 38 member 9),549,Q08BA4
+Q08BA6,alkbh5,RNA demethylase ALKBH5 (EC 1.14.11.53) (Alkylated DNA repair protein alkB homolog 5) (Alpha-ketoglutarate-dependent dioxygenase alkB homolog 5),352,Q08BA6
+Q08BB2,pm20d1.2,N-fatty-acyl-amino acid synthase/hydrolase PM20D1.2 (EC 3.5.1.114) (EC 3.5.1.14) (Peptidase M20 domain-containing protein 1.2),522,Q08BB2
+Q08BI9,mcu,"Calcium uniporter protein, mitochondrial",376,Q08BI9
+Q08BR4,setdb1b,Histone-lysine N-methyltransferase SETDB1-B (EC 2.1.1.366) (SET domain bifurcated 1B),1216,Q08BR4
+Q08BS4,ezh2,Histone-lysine N-methyltransferase EZH2 (EC 2.1.1.356) (Enhancer of zeste homolog 2),760,Q08BS4
+Q08C84,smyd4,Protein-lysine N-methyltransferase SMYD4 (EC 2.1.1.-) (SET and MYND domain-containing protein 4),753,Q08C84
+Q08C93,abhd12,Lysophosphatidylserine lipase ABHD12 (EC 3.1.1.-) (2-arachidonoylglycerol hydrolase ABHD12) (Abhydrolase domain-containing protein 12) (Monoacylglycerol lipase ABHD12) (EC 3.1.1.23) (Oxidized phosphatidylserine lipase ABHD12) (EC 3.1.-.-),382,Q08C93
+Q08CE7,cox7a1,"Cytochrome c oxidase subunit 7A1, mitochondrial",81,Q08CE7
+Q08CK7,igf2bp1,Insulin-like growth factor 2 mRNA-binding protein 1 (IGF2 mRNA-binding protein 1) (IMP-1) (IGF-II mRNA-binding protein 1) (VICKZ family member 1),598,Q08CK7
+Q0E671,cmasa,N-acylneuraminate cytidylyltransferase A (EC 2.7.7.43) (CMP-sialic acid synthetase 1),430,Q0E671
+Q0P483,slc25a42,Mitochondrial coenzyme A transporter SLC25A42 (Solute carrier family 25 member 42),321,Q0P483
+Q0V967,fbxo5,F-box only protein 5 (Early mitotic inhibitor 1) (Harpy protein),384,Q0V967
+Q155U0,vps51,Vacuolar protein sorting-associated protein 51 homolog (Protein fat-free),827,Q155U0
+Q1ECV4,ttll3,Tubulin monoglycylase TTLL3 (EC 6.3.2.-) (Tubulin--tyrosine ligase-like protein 3),771,Q1ECV4
+Q1ECW2,npas4a,Neuronal PAS domain-containing protein 4A (Neuronal PAS4A),933,Q1ECW2
+Q1ECX4,tlk2,Serine/threonine-protein kinase tousled-like 2 (EC 2.7.11.1) (PKU-alpha) (Tousled-like kinase 2),697,Q1ECX4
+Q1ECZ2,keap1a,Kelch-like ECH-associated protein 1A,601,Q1ECZ2
+Q1JPS6,opn4l,Melanopsin-like (Melanopsin) (Opsin-4-like),500,Q1JPS6
+Q1JPY5,cyp51,Lanosterol 14-alpha demethylase (LDM) (EC 1.14.14.154) (Cytochrome P450 family member 51) (CYP51) (Sterol 14-alpha demethylase),499,Q1JPY5
+Q1JPZ3,src,Proto-oncogene tyrosine-protein kinase Src (EC 2.7.10.2) (Proto-oncogene c-Src) (pp60c-src) (p60-Src),534,Q1JPZ3
+Q1L673,vdrb,"Vitamin D3 receptor B (VDR-B) (1,25-dihydroxyvitamin D3 receptor B) (Nuclear receptor subfamily 1 group I member 1-B)",422,Q1L673
+Q1L8J7,yap1,Transcriptional coactivator YAP1 (Yes-associated protein 1) (zYAP) (Protein yorkie homolog) (Yes-associated protein YAP65 homolog),442,Q1L8J7
+Q1L8L9,ak2,"Adenylate kinase 2, mitochondrial (AK 2) (EC 2.7.4.3) (ATP-AMP transphosphorylase 2) (ATP:AMP phosphotransferase) (Adenylate monophosphate kinase)",241,Q1L8L9
+Q1L8R9,snapin,SNARE-associated protein Snapin (Biogenesis of lysosome-related organelles complex 1 subunit 7) (SNAP-associated protein),129,Q1L8R9
+Q1L8U8,setdb1a,Histone-lysine N-methyltransferase SETDB1-A (EC 2.1.1.366) (SET domain bifurcated 1A),1436,Q1L8U8
+Q1L8X9,slc17a8,Vesicular glutamate transporter 3 (VGluT3) (Solute carrier family 17 member 8),590,Q1L8X9
+Q1LU99,ripor2,Rho family-interacting cell polarization regulator 2,1083,Q1LU99
+Q1LUC3,kat2b,Histone acetyltransferase KAT2B (EC 2.3.1.48) (Histone acetyltransferase PCAF) (Histone acetylase PCAF) (Lysine acetyltransferase 2B) (P300/CBP-associated factor) (P/CAF) (Spermidine acetyltransferase KAT2B) (EC 2.3.1.57),796,Q1LUC3
+Q1LV15,daw1,Dynein assembly factor with WD repeat domains 1 (Outer row dynein assembly protein 16 homolog) (WD repeat-containing protein 69),415,Q1LV15
+Q1LVF0,lamc1,Laminin subunit gamma-1,1593,Q1LVF0
+Q1LVI2,yjefn3,YjeF N-terminal domain-containing 3 (ApoA-I-binding protein 2),246,Q1LVI2
+Q1LVQ7,alx1,ALX homeobox protein 1 (Cartilage homeoprotein 1) (CART-1),320,Q1LVQ7
+Q1LVZ2,marchf2,E3 ubiquitin-protein ligase MARCHF2 (EC 2.3.2.27) (Membrane-associated RING finger protein 2) (Membrane-associated RING-CH protein II) (MARCH-II) (RING finger protein 172) (RING-type E3 ubiquitin transferase MARCHF2),249,Q1LVZ2
+Q1LW01,he1.2,Hatching enzyme 1.2 (EC 3.4.24.67) (Choriolysin H homolog 1) (High choriolytic enzyme 1 homolog) (zHCE-1),263,Q1LW01
+Q1LWG4,lpcat1,Lysophosphatidylcholine acyltransferase 1 (LPC acyltransferase 1) (LPCAT-1) (LysoPC acyltransferase 1) (EC 2.3.1.23) (1-acylglycerol-3-phosphate O-acyltransferase) (EC 2.3.1.51) (1-acylglycerophosphocholine O-acyltransferase) (1-alkenylglycerophosphocholine O-acyltransferase) (EC 2.3.1.25) (1-alkylglycerophosphocholine O-acetyltransferase) (EC 2.3.1.67) (Acetyl-CoA:lyso-platelet-activating factor acetyltransferase) (Acetyl-CoA:lyso-PAF acetyltransferase) (Lyso-PAF acetyltransferase) (LysoPAFAT) (Acyltransferase-like 2),517,Q1LWG4
+Q1LWH4,fan1,Fanconi-associated nuclease 1 (EC 3.1.21.-) (EC 3.1.4.1) (FANCD2/FANCI-associated nuclease 1) (Myotubularin-related protein 15),988,Q1LWH4
+Q1LX78,cftr,Cystic fibrosis transmembrane conductance regulator (EC 5.6.1.6) (ATP-binding cassette sub-family C member 7) (Channel conductance-controlling ATPase) (cAMP-dependent chloride channel),1485,Q1LX78
+Q1LYM3,spire1,Protein spire homolog 1,761,Q1LYM3
+Q1MT80,gbp4,Guanylate-binding protein 4 (EC 3.6.5.-) (GTP-binding protein 4) (GBP-4) (Guanine nucleotide-binding protein 4),618,Q1MT80
+Q20JQ7,scn4ab,Sodium channel protein type 4 subunit alpha B (Voltage-gated sodium channel subunit alpha Nav1.4b),1784,Q20JQ7
+Q287T7,slc25a37,Mitoferrin-1 (Mitochondrial iron transporter 1) (Protein frascati) (Solute carrier family 25 member 37),332,Q287T7
+Q2HXK8,fgf16,Fibroblast growth factor 16 (FGF16),203,Q2HXK8
+Q2I6J0,inppl1b,"Phosphatidylinositol 3,4,5-trisphosphate 5-phosphatase 2B (EC 3.1.3.86) (Inositol polyphosphate phosphatase-like protein 1B) (INPPL-1B) (SH2 domain-containing inositol 5'-phosphatase 2B) (SH2 domain-containing inositol phosphatase 2B) (SHIP-2B)",1226,Q2I6J0
+Q2I6J1,inppl1a,"Phosphatidylinositol 3,4,5-trisphosphate 5-phosphatase 2A (EC 3.1.3.86) (Inositol polyphosphate phosphatase-like protein 1A) (INPPL1-A) (SH2 domain-containing inositol 5'-phosphatase 2A) (SH2 domain-containing inositol phosphatase 2A) (SHIP-2A)",1266,Q2I6J1
+Q2L6L1,cnpy1,Protein canopy-1 (Protein D121),187,Q2L6L1
+Q2QCI8,med12,Mediator of RNA polymerase II transcription subunit 12 (Mediator complex subunit 12) (Protein kohtalo) (Protein motionless) (Thyroid hormone receptor-associated protein complex 230 kDa component) (Trap230),2173,Q2QCI8
+Q2TJA6,nkd1,Protein naked cuticle homolog 1 (Naked-1),440,Q2TJA6
+Q2WG80,ripply1,Protein ripply1,140,Q2WG80
+Q2XNF5,epo,Erythropoietin (Erythropoietin-L2),183,Q2XNF5
+Q32LQ6,mfsd1,Lysosomal dipeptide transporter MFSD1 (Major facilitator superfamily domain-containing protein 1),461,Q32LQ6
+Q32LT9,pm20d1.1,N-fatty-acyl-amino acid synthase/hydrolase PM20D1.1 (EC 3.5.1.114) (EC 3.5.1.14) (Peptidase M20 domain-containing protein 1.1),515,Q32LT9
+Q32PV5,tcf21,Transcription factor 21 (TCF-21) (Capsulin) (Epicardin) (MyoRa2),176,Q32PV5
+Q3LGD4,rab11fip4a,Rab11 family-interacting protein 4A (FIP4-Rab11) (Rab11-FIP4-A) (zRab11-FIP4-A),621,Q3LGD4
+Q3Y4E2,selenon,Selenoprotein N (SePN) (SelN),557,
+Q3YL68,b4galt5,"Beta-1,4-galactosyltransferase 5 (Beta-1,4-GalTase 5) (Beta4Gal-T5) (b4Gal-T5) (EC 2.4.1.-) (Beta-1,4-GalT II) (Glucosylceramide beta-1,4-galactosyltransferase) (EC 2.4.1.274) (Lactosylceramide synthase) (LacCer synthase) (UDP-Gal:beta-GlcNAc beta-1,4-galactosyltransferase 5) (UDP-galactose:beta-N-acetylglucosamine beta-1,4-galactosyltransferase 5)",381,Q3YL68
+Q3ZMH1,slc5a8,Sodium-coupled monocarboxylate transporter 1 (Electrogenic sodium monocarboxylate cotransporter) (zSMCTe) (Sodium solute symporter family 5 member 8 protein) (Solute carrier family 5 member 8),610,Q3ZMH1
+Q49GP3,pi4kb,Phosphatidylinositol 4-kinase beta (PI4K-beta) (PI4Kbeta) (PtdIns 4-kinase beta) (EC 2.7.1.67),835,Q49GP3
+Q49HM9,grk7a,Rhodopsin kinase grk7a (EC 2.7.11.14) (G protein-coupled receptor kinase 7-1) (G protein-coupled receptor kinase 7A),549,Q49HM9
+Q49SH1,slc24a5,Sodium/potassium/calcium exchanger 5 (Na(+)/K(+)/Ca(2+)-exchange protein 5) (Protein golden) (Solute carrier family 24 member 5),513,Q49SH1
+Q4G3H4,chuk,Inhibitor of nuclear factor kappa-B kinase subunit alpha (I kappa-B kinase alpha) (IKK-A) (IKK-alpha) (IkBKA) (IkappaB kinase) (EC 2.7.11.10) (Conserved helix-loop-helix ubiquitous kinase) (I-kappa-B kinase 1) (IKK1) (Nuclear factor NF-kappa-B inhibitor kinase alpha) (NFKBIKA),758,Q4G3H4
+Q4H4B6,scrib,Protein scribble homolog (Scribble1),1724,Q4H4B6
+Q4JL91,ippk,"Inositol-pentakisphosphate 2-kinase (EC 2.7.1.158) (Inositol-1,3,4,5,6-pentakisphosphate 2-kinase) (Ins(1,3,4,5,6)P5 2-kinase) (InsP5 2-kinase)",483,Q4JL91
+Q4KMD7,tut1,Speckle targeted PIP5K1A-regulated poly(A) polymerase (Star-PAP) (EC 2.7.7.19) (RNA-binding motif protein 21) (RNA-binding protein 21) (U6 snRNA-specific terminal uridylyltransferase 1) (U6-TUTase) (EC 2.7.7.52),797,Q4KMD7
+Q4QRF4,; ; ,Histone H3.2,136,Q4QRF4
+Q4TTN8,apln,Apelin (APJ endogenous ligand),77,Q4TTN8
+Q4TVV3,ddx46,Probable ATP-dependent RNA helicase DDX46 (EC 3.6.4.13) (DEAD box protein 46),1018,Q4TVV3
+Q4U2V3,agtpbp1,Cytosolic carboxypeptidase 1 (EC 3.4.17.-) (EC 3.4.17.24) (ATP/GTP-binding protein 1) (Protein deglutamylase CCP1),1153,Q4U2V3
+Q4V8R7,nr6a1b,Nuclear receptor subfamily 6 group A member 1-B (Germ cell nuclear factor B) (GCNF-B),455,Q4V8R7
+Q4V920,pacsin1b,Protein kinase C and casein kinase substrate in neurons protein 1 (Syndapin-1),445,Q4V920
+Q4V9F0,dgat2,Diacylglycerol O-acyltransferase 2 (EC 2.3.1.20) (Acyl-CoA retinol O-fatty-acyltransferase) (ARAT) (Retinol O-fatty-acyltransferase) (EC 2.3.1.76) (Diglyceride acyltransferase 2),361,Q4V9F0
+Q4VSN1,dstyk,Dual serine/threonine and tyrosine protein kinase (EC 2.7.12.1) (Dusty protein kinase) (Dusty PK) (Receptor-interacting serine/threonine-protein kinase 5),885,Q4VSN1
+Q501Z5,gtpbp3,"5-taurinomethyluridine-[tRNA] synthase subunit GTPB3, mitochondrial (EC 3.6.1.-) (GTP-binding protein 3) (tRNA modification GTPase GTPBP3, mitochondrial)",500,Q501Z5
+Q502I3,cep55,Centrosomal protein of 55 kDa (Centrosomal protein 55-like),435,Q502I3
+Q502J0,lpcat2,Lysophosphatidylcholine acyltransferase 2 (LPC acyltransferase 2) (LPCAT-2) (LysoPC acyltransferase 2) (EC 2.3.1.23) (1-acylglycerol-3-phosphate O-acyltransferase 11) (1-AGP acyltransferase 11) (1-AGPAT 11) (EC 2.3.1.51) (1-acylglycerophosphocholine O-acyltransferase) (1-alkenylglycerophosphocholine O-acyltransferase) (EC 2.3.1.25) (1-alkylglycerophosphocholine O-acetyltransferase) (EC 2.3.1.67) (Acyltransferase-like 1),529,Q502J0
+Q502K2,samhd1,Deoxynucleoside triphosphate triphosphohydrolase SAMHD1 (dNTPase) (EC 3.1.5.-),622,Q502K2
+Q504J1,caspb,Caspase b (EC 3.4.22.58) (Caspase 19a) [Cleaved into: Caspase b subunit p20; Caspase b subunit p10],404,Q504J1
+Q52KL1,fitm2,Acyl-coenzyme A diphosphatase FITM2 (EC 3.6.1.-) (Fat storage-inducing transmembrane protein 2) (Fat-inducing protein 2),252,Q52KL1
+Q561X9,bdh2,Dehydrogenase/reductase SDR family member 6 (EC 1.1.1.-) ((R)-beta-hydroxybutyrate dehydrogenase) (3-hydroxybutyrate dehydrogenase type 2) (EC 1.1.1.30) (4-oxo-L-proline reductase) (EC 1.1.1.104) (Oxidoreductase UCPA) (Short chain dehydrogenase/reductase family 15C member 1),245,Q561X9
+Q568P9,henmt1,Small RNA 2'-O-methyltransferase (EC 2.1.1.386) (HEN1 methyltransferase homolog 1),402,Q568P9
+Q568Q0,nudt18,"8-oxo-dGDP phosphatase NUDT18 (EC 3.6.1.58) (EC 3.6.1.68) (EC 3.6.1.76) (2-hydroxy-dADP phosphatase) (7,8-dihydro-8-oxoguanine phosphatase) (Nucleoside diphosphate-linked moiety X motif 18) (Nudix motif 18)",325,Q568Q0
+Q56A40,ccdc40,Coiled-coil domain-containing protein 40 (Protein locke),941,Q56A40
+Q575S8,cygb2,Cytoglobin-2 (Nitric oxygen dioxygenase CYGB) (EC 1.14.12.-) (Nitrite reductase CYGB) (EC 1.7.-.-) (Pseudoperoxidase CYGB) (EC 1.11.1.-) (Superoxide dismutase CYGB) (EC 1.15.1.1),179,Q575S8
+Q58G59,kif7,Kinesin-like protein kif7 (Kinesin-like protein costal2),1363,Q58G59
+Q59I63,adgrg1,"Adhesion G protein-coupled receptor G1 (G protein-coupled receptor 56) [Cleaved into: Adhesion G protein-coupled receptor G1, N-terminal fragment (ADGRG1 N-terminal fragment) (ADGRG1 NT); Adhesion G protein-coupled receptor G1, C-terminal fragment (ADGRG1 C-terminal fragment) (ADGRG1 CT)]",648,Q59I63
+Q5BJI7,smyd2a,N-lysine methyltransferase SMYD2-A (EC 2.1.1.-) (Histone methyltransferase SMYD2-A) (EC 2.1.1.354) (SET and MYND domain-containing protein 2A),435,Q5BJI7
+Q5BKW7,enpp6,Glycerophosphocholine cholinephosphodiesterase ENPP6 (GPC-Cpde) (EC 3.1.4.-) (EC 3.1.4.38) (Choline-specific glycerophosphodiester phosphodiesterase) (Ectonucleotide pyrophosphatase/phosphodiesterase family member 6) (E-NPP 6) (NPP-6),438,Q5BKW7
+Q5BL29,slc39a9,Zinc transporter ZIP9 (Solute carrier family 39 member 9) (Zrt- and Irt-like protein 9) (ZIP-9),309,Q5BL29
+Q5BLG4,zdhhc2,Palmitoyltransferase ZDHHC2 (EC 2.3.1.225) (Acyltransferase ZDHHC2) (EC 2.3.1.-) (DHHC domain-containing protein 2) (Zinc finger DHHC domain-containing protein 2),361,Q5BLG4
+Q5CZP2,hsf4,Heat shock factor protein 4,441,Q5CZP2
+Q5CZR5,aep1,Aerolysin-like protein (Jacalin-type lectin domain-containing protein 5),315,Q5CZR5
+Q5EGE1,ism1,Isthmin-1,461,Q5EGE1
+Q5G872,scube2,"Signal peptide, CUB and EGF-like domain-containing protein 2 (Protein You)",1010,Q5G872
+Q5GIT4,kdr,Vascular endothelial growth factor receptor 2 (VEGFR-2) (EC 2.7.10.1) (Fetal liver kinase 1b) (FLK-1b) (Kinase insert domain receptor) (Kinase insert domain receptor-B) (Protein-tyrosine kinase receptor flk-1b) (Vascular endothelial growth factor receptor 2 homolog B) (VEGFR-2 homolog B),1357,Q5GIT4
+Q5M7Y0,cert1,Ceramide transfer protein (CERT) (Collagen type IV alpha-3-binding protein) (Goodpasture antigen-binding protein) (GPBP),620,Q5M7Y0
+Q5M9P8,arl6,ADP-ribosylation factor-like protein 6,186,Q5M9P8
+Q5MD89,flt4,Vascular endothelial growth factor receptor 3 (VEGFR-3) (EC 2.7.10.1),1357,Q5MD89
+Q5PQZ7,popdc1,Popeye domain-containing protein 1 (Popeye protein 1) (Blood vessel epicardial substance) (BVES) (hBVES),352,Q5PQZ7
+Q5PR66,ift56,Intraflagellar transport protein 56 (Tetratricopeptide repeat protein 26) (TPR repeat protein 26),557,Q5PR66
+Q5PYH6,dlg1,Disks large homolog 1 (Synapse-associated protein 97A) (SAP-97A) (SAP97A),873,Q5PYH6
+Q5PZ43,xirp1,Xin actin-binding repeat-containing protein 1 (Cardiomyopathy-associated protein 1),2297,Q5PZ43
+Q5QNP2,taar13c,Trace amine-associated receptor 13c,341,Q5QNP2
+Q5R328,rspo3,R-spondin-3 (Cabriolet) (Roof plate-specific spondin-3),317,Q5R328
+Q5RGJ8,gnptab,N-acetylglucosamine-1-phosphotransferase subunits alpha/beta (EC 2.7.8.17) (GlcNAc-1-phosphotransferase subunits alpha/beta) (Stealth protein gnptab) (UDP-N-acetylglucosamine-1-phosphotransferase subunits alpha/beta) [Cleaved into: N-acetylglucosamine-1-phosphotransferase subunit alpha; N-acetylglucosamine-1-phosphotransferase subunit beta],1219,Q5RGJ8
+Q5RGL7,smyd2b,N-lysine methyltransferase SMYD2-B (EC 2.1.1.-) (Histone methyltransferase SMYD2-B) (EC 2.1.1.354) (SET and MYND domain-containing protein 2B),434,Q5RGL7
+Q5RGQ2,prmt8b,Protein arginine N-methyltransferase 8-B (EC 2.1.1.319) (Heterogeneous nuclear ribonucleoprotein methyltransferase-like protein 4) (zfL3),419,Q5RGQ2
+Q5RGU1,coq8a,"Atypical kinase COQ8A, mitochondrial (EC 2.7.-.-) (Chaperone activity of bc1 complex-like) (Chaperone-ABC1-like) (Coenzyme Q protein 8A) (aarF domain-containing protein kinase 3)",619,Q5RGU1
+Q5RH73,smo,Protein smoothened,822,Q5RH73
+Q5RHB5,irag2,"Inositol 1,4,5-triphosphate receptor associated 2 (Lymphoid-restricted membrane protein)",1447,Q5RHB5
+Q5RHD1,kdm7a,Lysine-specific demethylase 7A (DrKDM7a) (EC 1.14.11.-) (JmjC domain-containing histone demethylation protein 1D-A),875,Q5RHD1
+Q5RHR0,parp1,Poly [ADP-ribose] polymerase 1 (PARP-1) (EC 2.4.2.30) (ADP-ribosyltransferase diphtheria toxin-like 1) (ARTD1) (DNA ADP-ribosyltransferase PARP1) (EC 2.4.2.-) (NAD(+) ADP-ribosyltransferase 1) (ADPRT 1) (Poly[ADP-ribose] synthase 1) (Protein poly-ADP-ribosyltransferase PARP1) (EC 2.4.2.-),1013,Q5RHR0
+Q5RIC0,elp3,Elongator complex protein 3 (EC 2.3.1.311) (tRNA uridine(34) acetyltransferase),548,Q5RIC0
+Q5RIX9,e2f7,Transcription factor E2F7 (E2F-7),723,Q5RIX9
+Q5RJ80,caprin2,Caprin-2 (RNA granule protein 140),914,Q5RJ80
+Q5SPB1,slc38a2,Sodium-coupled neutral amino acid symporter 2 (Amino acid transporter A2) (Solute carrier family 38 member 2) (System A amino acid transporter 2) (System A transporter 1) (System N amino acid transporter 2),504,Q5SPB1
+Q5SPC5,otofa,Otoferlin (Fer-1-like protein 2),1992,Q5SPC5
+Q5TYW4,nbas,NBAS subunit of NRZ tethering complex (Neuroblastoma-amplified gene protein homolog) (Neuroblastoma-amplified sequence),2372,Q5TYW4
+Q5TYW6,rsph9,Radial spoke head protein 9 homolog,277,Q5TYW6
+Q5TZ07,plpp6,Polyisoprenoid diphosphate/phosphate phosphohydrolase PLPP6 (EC 3.1.3.-) (EC 3.6.1.-) (EC 3.6.1.68) (Phosphatidic acid phosphatase type 2 domain-containing protein 2) (Phospholipid phosphatase 6),288,Q5TZ07
+Q5TZ18,nav3,Neuron navigator 3,2269,Q5TZ18
+Q5TZ51,mpv17,Mitochondrial inner membrane protein Mpv17 (Protein Mpv17),177,Q5TZ51
+Q5U3A7,opa1,"Dynamin-like GTPase OPA1, mitochondrial (EC 3.6.5.5) (Optic atrophy protein 1 homolog) [Cleaved into: Dynamin-like GTPase OPA1, long form (L-OPA1); Dynamin-like GTPase OPA1, short form (S-OPA1)]",966,Q5U3A7
+Q5U3H2,kmt5b,Histone-lysine N-methyltransferase KMT5B (Lysine-specific methyltransferase 5B) (Suppressor of variegation 4-20 homolog 1) (Su(var)4-20 homolog 1) (Suv4-20h1) ([histone H4]-N-methyl-L-lysine20 N-methyltransferase KMT5B) (EC 2.1.1.362) ([histone H4]-lysine20 N-methyltransferase KMT5B) (EC 2.1.1.361),808,Q5U3H2
+Q5U3U3,cpt2,"Carnitine O-palmitoyltransferase 2, mitochondrial (EC 2.3.1.21) (Carnitine palmitoyltransferase II) (CPT II)",669,Q5U3U3
+Q5U3U7,mfsd2aa,Sodium-dependent lysophosphatidylcholine symporter 1-A (NLS1-A) (Sodium-dependent LPC symporter 1-A) (Major facilitator superfamily domain-containing protein 2A-A),532,Q5U3U7
+Q5U3W1,pomk,Protein O-mannose kinase (POMK) (EC 2.7.1.183) (Protein kinase-like protein SgK196) (Sugen kinase 196),347,Q5U3W1
+Q5VSE6,kcnk13b,"Potassium channel, subfamily K, member 13 (K2P13.1b) (Tandem pore domain halothane-inhibited potassium channel)",412,Q5VSE6
+Q5W7F1,asah2,Neutral ceramidase (N-CDase) (NCDase) (EC 3.5.1.23) (Acylsphingosine deacylase 2) (N-acylsphingosine amidohydrolase 2) (znCD),743,Q5W7F1
+Q5W8I7,slc17a6a,Vesicular glutamate transporter 2.2 (Solute carrier family 17 member 6-A) (Vesicular glutamate transporter 2-B),587,Q5W8I7
+Q5W8I8,slc17a6b,Vesicular glutamate transporter 2.1 (Protein blumenkohl) (Solute carrier family 17 member 6-B) (Vesicular glutamate transporter 2-A),584,Q5W8I8
+Q5XJ10,gapdh,Glyceraldehyde-3-phosphate dehydrogenase (GAPDH) (EC 1.2.1.12) (Peptidyl-cysteine S-nitrosylase GAPDH) (EC 2.6.99.-),333,Q5XJ10
+Q5XJ36,park7,"Parkinson disease protein 7 homolog (Maillard deglycase) (Parkinsonism-associated deglycase) (Protein DJ-1zDJ-1) (zDJ-1) (Protein/nucleic acid deglycase DJ-1) (EC 3.1.2.-, EC 3.5.1.-, EC 3.5.1.124)",189,Q5XJ36
+Q5XJ85,myd88,Myeloid differentiation primary response protein MyD88,284,Q5XJ85
+Q5XJA0,tdp2,Tyrosyl-DNA phosphodiesterase 2 (Tyr-DNA phosphodiesterase 2) (EC 3.1.4.-) (5'-tyrosyl-DNA phosphodiesterase) (5'-Tyr-DNA phosphodiesterase) (TRAF and TNF receptor-associated protein homolog),369,Q5XJA0
+Q5XJA3,prrc1,Protein PRRC1 (Proline-rich and coiled-coil-containing protein 1) (Protein misty somites),435,Q5XJA3
+Q5XJN2,ifi30a,Gamma-interferon-inducible lysosomal thiol reductase (zGILT) (EC 1.8.4.-) (Gamma-interferon-inducible protein IP-30),255,Q5XJN2
+Q5XJQ7,osr1,Protein odd-skipped-related 1 (zOsr1),264,Q5XJQ7
+Q642M9,dhdh,"Trans-1,2-dihydrobenzene-1,2-diol dehydrogenase (EC 1.3.1.20) (D-arabinose 1-dehydrogenase) (EC 1.1.1.-) (D-galactose 1-dehydrogenase) (EC 1.1.1.120) (D-glucose 1-dehydrogenase) (EC 1.1.1.119) (D-ribose 1-dehydrogenase) (EC 1.1.1.115) (D-xylose 1-dehydrogenase) (D-xylose-NADP dehydrogenase) (EC 1.1.1.179) (Dimeric dihydrodiol dehydrogenase)",334,Q642M9
+Q66HT8,adprs,ADP-ribosylhydrolase ARH3 (ADP-ribose glycohydrolase ARH3) (ADP-ribosylhydrolase 3) (O-acetyl-ADP-ribose deacetylase ARH3) (EC 3.5.1.-) (Poly(ADP-ribose) glycohydrolase ARH3) (EC 3.2.1.143) ([Protein ADP-ribosylarginine] hydrolase-like protein 2) ([Protein ADP-ribosylserine] hydrolase) (EC 3.2.2.-),370,Q66HT8
+Q66I08,slc51a,Organic solute transporter subunit alpha (OST-alpha) (Solute carrier family 51 subunit alpha),326,Q66I08
+Q66I42,msna,Moesin a (Membrane-organizing extension spike protein) (Moesin 1),579,Q66I42
+Q66IA6,lypd6,Ly6/PLAUR domain-containing protein 6,174,Q66IA6
+Q66L49,slc25a24,Mitochondrial adenyl nucleotide antiporter SLC25A24 (Small calcium-binding mitochondrial carrier protein 1) (SCaMC-1) (Solute carrier family 25 member 24),477,Q66L49
+Q66PG2,large1,"Xylosyl- and glucuronyltransferase LARGE1 (EC 2.4.-.-) (Acetylglucosaminyltransferase-like 1A) (Glycosyltransferase-like protein) (LARGE xylosyl- and glucuronyltransferase 1) [Includes: Alpha-1,3-xylosyltransferase LARGE1 (EC 2.4.2.-); Beta-1,3-glucuronyltransferase LARGE1 (EC 2.4.1.-)]",757,Q66PG2
+Q673G8,dact2,Dapper homolog 2 (Frodo 2),837,Q673G8
+Q68EH9,crbn,Protein cereblon (zcrbn),431,Q68EH9
+Q68EI3,agbl5,Cytosolic carboxypeptidase-like protein 5 (EC 3.4.17.-) (EC 3.4.17.24) (ATP/GTP-binding protein-like 5) (Protein deglutamylase CCP5),885,Q68EI3
+Q68SP4,cdh5,Cadherin-5 (Vascular endothelial cadherin) (VE-cadherin),767,Q68SP4
+Q68Y21,grid2,"Glutamate receptor ionotropic, delta-2 (GluD2) (GluR delta-2 subunit)",1009,Q68Y21
+Q6B3P0,cdhr1a,Cadherin-related family member 1a (Photoreceptor cadherin) (prCAD) (Protocadherin-21),857,Q6B3P0
+Q6DBR6,stac3,SH3 and cysteine-rich domain-containing protein 3,334,Q6DBR6
+Q6DBU5,gmppb,Mannose-1-phosphate guanylyltransferase catalytic subunit beta (EC 2.7.7.13) (GDP-mannose pyrophosphorylase B) (GTP-mannose-1-phosphate guanylyltransferase beta),360,Q6DBU5
+Q6DBX4,mastl,Serine/threonine-protein kinase greatwall (GW) (GWL) (EC 2.7.11.1) (Microtubule-associated serine/threonine-protein kinase-like) (MAST-L),860,Q6DBX4
+Q6DBY2,naa50,N-alpha-acetyltransferase 50 (EC 2.3.1.258) (N-acetyltransferase NAT13) (N-epsilon-acetyltransferase 50) (EC 2.3.1.-) (NatE catalytic subunit),168,Q6DBY2
+Q6DC64,mettl16,RNA N(6)-adenosine-methyltransferase mettl16 (EC 2.1.1.348) (Methyltransferase 10 domain-containing protein) (Methyltransferase-like protein 16) (U6 small nuclear RNA (adenine-(43)-N(6))-methyltransferase) (EC 2.1.1.346),471,Q6DC64
+Q6DEH3,camk2d1,Calcium/calmodulin-dependent protein kinase type II delta 1 chain (EC 2.7.11.17) (Calcium/calmodulin-dependent protein kinase type II delta-B chain) (CaM kinase II subunit delta-B) (CaM-kinase II delta-B chain) (CaMK-II subunit delta-B),491,Q6DEH3
+Q6DEJ6,mfsd2ab,Sodium-dependent lysophosphatidylcholine symporter 1-B (NLS1-B) (Sodium-dependent LPC symporter 1-B) (Major facilitator superfamily domain-containing protein 2A-B),523,Q6DEJ6
+Q6DG36,slc30a5,Proton-coupled zinc antiporter SLC30A5 (Solute carrier family 30 member 5) (Zinc transporter 5) (ZnT-5),775,Q6DG36
+Q6DG38,gpat3,Glycerol-3-phosphate acyltransferase 3 (GPAT-3) (EC 2.3.1.15) (1-acyl-sn-glycerol-3-phosphate O-acyltransferase 10) (AGPAT 10) (1-acyl-sn-glycerol-3-phosphate O-acyltransferase 9) (1-AGP acyltransferase 9) (1-AGPAT 9) (EC 2.3.1.51) (Lysophosphatidic acid acyltransferase theta) (LPAAT-theta),449,Q6DG38
+Q6DG85,uox,Uricase (EC 1.7.3.3) (Urate oxidase),298,Q6DG85
+Q6DGB6,dnaaf19,Dynein axonemal assembly factor 19 (Coiled-coil domain-containing protein 103) (Protein schmalhans),247,Q6DGB6
+Q6DGD3,suv39h1a,Histone-lysine N-methyltransferase SUV39H1-A (EC 2.1.1.-) (Suppressor of variegation 3-9 homolog 1-A) (Su(var)3-9 homolog 1-A),411,Q6DGD3
+Q6DGE9,unc45b,Protein unc-45 homolog B (Unc-45B) (UNC45-related protein),934,Q6DGE9
+Q6DGH9,otpb,Homeobox protein orthopedia B,315,Q6DGH9
+Q6DGS3,camk2d2,Calcium/calmodulin-dependent protein kinase type II delta 2 chain (EC 2.7.11.17) (Calcium/calmodulin-dependent protein kinase type II delta-A chain) (CaM kinase II subunit delta-A) (CaM-kinase II delta-A chain) (CaMK-II subunit delta-A),554,Q6DGS3
+Q6DH13,rbpms2a,"RNA-binding protein, mRNA-processing factor 2a (rbpms2a) (Heart and RRM expressed sequence) (hermes) (Protein hermes A)",199,Q6DH13
+Q6DHC1,rab18b,Ras-related protein Rab-18-B (EC 3.6.5.2),205,Q6DHC1
+Q6DHF9,six1a,Homeobox protein six1a (Homeobox protein six1b) (Sine oculis homeobox homolog 1a) (Sine oculis homeobox homolog 1b),283,Q6DHF9
+Q6DHI1,zdhhc7,Palmitoyltransferase ZDHHC7 (EC 2.3.1.225) (Acyltransferase ZDHHC7) (EC 2.3.1.-) (Zinc finger DHHC domain-containing protein 7),299,Q6DHI1
+Q6DHI5,sirt5,"NAD-dependent protein deacylase sirtuin-5, mitochondrial (EC 2.3.1.-) (Regulatory protein SIR2 homolog 5)",305,Q6DHI5
+Q6DHM9,rhoab,Rho-related GTP-binding protein RhoA-B (EC 3.6.5.2),193,Q6DHM9
+Q6DHR8,nus1,"Dehydrodolichyl diphosphate synthase complex subunit nus1 (EC 2.5.1.87) (Di-trans,poly-cis-decaprenylcistransferase) (Nogo-B receptor) (NgBR) (Nuclear undecaprenyl pyrophosphate synthase 1 homolog)",274,Q6DHR8
+Q6DI48,dla,Delta-like protein A (DeltaA),772,Q6DI48
+Q6DRB1,gle1,mRNA export factor GLE1 (GLE1 RNA export mediator) (GLE1-like protein) (Nucleoporin GLE1),695,Q6DRB1
+Q6DRC0,sars1,"Serine--tRNA ligase, cytoplasmic (EC 6.1.1.11) (Seryl-tRNA synthetase) (SerRS)",515,Q6DRC0
+Q6DRC3,cfap298,Cilia- and flagella-associated protein 298 (Protein kurly),290,Q6DRC3
+Q6DRG7,ppp1r12a,Protein phosphatase 1 regulatory subunit 12A (Myosin phosphatase-targeting subunit 1) (Myosin phosphatase target subunit 1) (Protein phosphatase myosin-binding subunit),,
