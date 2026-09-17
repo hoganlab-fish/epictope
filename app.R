@@ -137,9 +137,18 @@ aa_colors <- c(
 # amber = sequence termini, green = top scoring peaks (good tag candidates),
 # red = curated UniProt binding-site residues (avoid tagging over these),
 # blue = whatever the user last clicked or range-selected on any panel.
+# Every one of these is used as the ONE canonical hex for that meaning
+# everywhere it appears (score plot bands/lines/text, MSA outline boxes,
+# 3D structure, downloadable report, legends) -- no separate "darker" or
+# "lighter" variant per panel, so the same meaning never looks like two
+# different colors depending on which plot you're looking at. Chosen to
+# also stay clear of every `aa_colors` hue (peak green used to be the exact
+# same hex as the "polar" amino acid color; binding red used to be very
+# close to the "positive" amino acid color) and of the feature-plot trace
+# colors (black/brown/forestgreen/teal).
 COLOR_DEFAULT_SITE <- "#FFC107"
-COLOR_PEAK          <- "#2ECC71"
-COLOR_BINDING       <- "#E53935"
+COLOR_PEAK          <- "#00C853"
+COLOR_BINDING       <- "#C62828"
 COLOR_USER_TAG      <- "#2979FF"
 
 # A small colored square + label, for building color-key legends.
@@ -415,7 +424,7 @@ ui <- fluidPage(
             paste(
               "Top: 'Min score' -- the minimum of the four normalized feature scores below, averaged over a 7-residue window; ranges 0-1, higher = better candidate for inserting an epitope tag without disrupting the protein.",
               "Bottom: the four underlying features, each normalized 0-1. Entropy: sequence variability across homologs (higher = less conserved = safer). Secondary structure: 1 = loop/coil, 0 = helix/sheet (higher = more tolerant of insertion). RSA: relative solvent accessibility (higher = more surface-exposed). Disorder (DBR): inverted ANCHOR2 disordered-binding-region score (higher = less likely to be a protein-binding interface).",
-              "A solid black vertical line always marks wherever the alignment strip below is centered -- it moves live as you scroll that strip sideways, even before you've clicked anything."
+              "A bright magenta vertical line always marks wherever the alignment strip below is centered -- it moves live as you scroll that strip sideways, even before you've clicked anything."
             )
           ),
           tags$div(style = "font-size: 12px; color: #666; margin-bottom: 4px;",
@@ -716,7 +725,7 @@ server <- function(input, output, session) {
     feat_specs <- list(
       list(col = "normalized_entropy", name = "Entropy", color = "black",
            desc = "Sequence variability across homologs (0=conserved, 1=variable); higher = safer to tag"),
-      list(col = "ss_score", name = "Secondary structure", color = "darkorange",
+      list(col = "ss_score", name = "Secondary structure", color = "#8B4513",
            desc = "0=helix/sheet, 1=loop/coil; higher = more tolerant of an insertion"),
       list(col = "rsa", name = "RSA", color = "forestgreen",
            desc = "Relative solvent accessibility (0=buried, 1=exposed); higher = more surface-exposed"),
@@ -736,25 +745,28 @@ server <- function(input, output, session) {
     # Default "regions of interest" -- always shown as a shaded band (not
     # just a hairline) plus a bold dashed center line, so they read as
     # regions at a glance, not something you have to spot a thin line for.
-    build_site_shapes <- function(sdf, fill_color, line_color) {
+    # One canonical `color` per kind for both the band and the line/text --
+    # a separate darker "line color" per kind used to exist here, which just
+    # meant the same site looked like two different colors within one plot.
+    build_site_shapes <- function(sdf, color) {
       if (nrow(sdf) == 0) return(list(bands = list(), lines = list(), annotations = list()))
       bands <- lapply(sdf$position, function(pos) {
         list(type = "rect", x0 = pos - 1.5, x1 = pos + 1.5, y0 = 0, y1 = 1, xref = "x",
-             fillcolor = fill_color, opacity = 0.30, line = list(width = 0))
+             fillcolor = color, opacity = 0.30, line = list(width = 0))
       })
       lines <- lapply(sdf$position, function(pos) {
         list(type = "line", x0 = pos, x1 = pos, y0 = 0, y1 = 1, xref = "x",
-             line = list(color = line_color, dash = "dash", width = 2))
+             line = list(color = color, dash = "dash", width = 2))
       })
       annotations <- lapply(seq_len(nrow(sdf)), function(i) {
         list(x = sdf$position[i], y = sdf$score[i], xref = "x", yref = "y",
              text = sprintf("%.3f", sdf$score[i]), showarrow = TRUE, arrowhead = 0,
-             ax = 0, ay = -25, font = list(size = 11, color = line_color, family = "Arial Black"))
+             ax = 0, ay = -25, font = list(size = 11, color = color, family = "Arial Black"))
       })
       list(bands = bands, lines = lines, annotations = annotations)
     }
-    term_vis <- build_site_shapes(term_sites, COLOR_DEFAULT_SITE, "#7a5b00")
-    peak_vis <- build_site_shapes(peak_sites, COLOR_PEAK, "#1b7a41")
+    term_vis <- build_site_shapes(term_sites, COLOR_DEFAULT_SITE)
+    peak_vis <- build_site_shapes(peak_sites, COLOR_PEAK)
 
     # Curated UniProt binding-site residues -- drawn as wide, low-opacity
     # red bands (behind everything else) so tagging near a known functional
@@ -784,15 +796,14 @@ server <- function(input, output, session) {
     # (which mark fixed candidate sites) and from the user-tag box (which
     # only appears after a click) -- this one is always present and moves
     # live as the alignment strip is scrolled.
-    # Solid black, on top of everything else (including the user-tag box) --
-    # deliberately a color and style used nowhere else in the legend, so it
-    # never blends into a peak/term line even when they land on the exact
-    # same position (the common default case: nothing clicked yet, so the
-    # focus starts out sitting right on the top peak).
+    # Bright magenta, on top of everything else (including the user-tag
+    # box) -- deliberately a color used nowhere else on this plot (the
+    # "Min score" and "Entropy" traces are both black, so black was
+    # invisible here -- it blended straight into those curves).
     focus_pos <- focus_position()
     focus_shapes <- if (!is.null(focus_pos)) {
       list(list(type = "line", x0 = focus_pos, x1 = focus_pos, y0 = 0, y1 = 1, xref = "x",
-                line = list(color = "#000000", width = 3)))
+                line = list(color = "#FF00FF", width = 3)))
     } else list()
 
     all_shapes <- c(binding_shapes, term_vis$bands, peak_vis$bands,
@@ -848,25 +859,21 @@ server <- function(input, output, session) {
     mat <- ml$mat; seq_names <- ml$seq_names
     n_positions <- ml$n_positions; n_seqs <- ml$n_seqs
 
+    # Cell fill is ALWAYS the true amino-acid color -- never overridden by a
+    # site highlight. Two color scales (termini/peaks/binding-site/gap and
+    # amino-acid property) sharing the same cells would inevitably collide
+    # somewhere (e.g. the peak green used to be the exact same hex as the
+    # "polar" amino-acid color, so a highlighted peak was indistinguishable
+    # from an ordinary polar residue elsewhere). Sites are marked purely by
+    # colored outline boxes (below), which never touch the letter/fill color.
     letters_present <- sort(unique(as.vector(mat)))
     n_base <- length(letters_present)
     letter_idx <- setNames(seq_along(letters_present) - 1, letters_present)
+    n_total_bins <- n_base
 
-    # Three extra color bins appended after the amino-acid letters: termini,
-    # top peaks, and UniProt binding sites. The user's active click/range is
-    # NOT a color bin (see below) -- it's drawn as outline-only boxes so it
-    # never hides the amino-acid color/letter underneath it.
-    bin_colors <- c(
-      vapply(letters_present, function(l) {
-        c <- unname(aa_colors[l]); if (is.na(c)) "#BBBBBB" else c
-      }, character(1)),
-      COLOR_DEFAULT_SITE, COLOR_PEAK, COLOR_BINDING
-    )
-    n_total_bins <- length(bin_colors)
-    idx_term    <- n_base
-    idx_peak    <- n_base + 1
-    idx_binding <- n_base + 2
-
+    bin_colors <- vapply(letters_present, function(l) {
+      c <- unname(aa_colors[l]); if (is.na(c)) "#BBBBBB" else c
+    }, character(1))
     msa_colorscale <- list()
     for (i in seq_along(bin_colors)) {
       msa_colorscale[[length(msa_colorscale) + 1]] <- list((i - 1) / n_total_bins, bin_colors[i])
@@ -882,7 +889,7 @@ server <- function(input, output, session) {
       rng <- tag_range(); seq(rng[1], rng[2])
     } else integer(0)
 
-    run_color <- c(term = "#7a5b00", peak = "#1b7a41", binding = "#8a1c1c", user = COLOR_USER_TAG)
+    run_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK, binding = COLOR_BINDING, user = COLOR_USER_TAG)
     run_width <- c(term = 3, peak = 3, binding = 3, user = 4)
     # Contiguous highlighted runs -- one entry per (row, kind, run), so an
     # entire highlighted stretch (a binding motif, a dragged range) draws as
@@ -906,7 +913,7 @@ server <- function(input, output, session) {
       shapes[order(vapply(runs, function(r) r$kind == "user", logical(1)))]
     }
     hover_suffix <- paste0(
-      "<br><i>Fill color = amino-acid property, or a highlighted site (see legend below)</i>",
+      "<br><i>Fill color = amino-acid property; an outlined box = a highlighted site (see legend below)</i>",
       "<extra></extra>")
 
     if (isTRUE(input$msa_full_view)) {
@@ -951,13 +958,13 @@ server <- function(input, output, session) {
           row_customdata[idx] <- abs_cols
 
           hit_term <- which(abs_cols %in% term_positions)
-          if (length(hit_term) > 0) { row_z[idx[hit_term]] <- idx_term; add_runs(row_key, idx[hit_term], "term") }
+          if (length(hit_term) > 0) add_runs(row_key, idx[hit_term], "term")
           hit_peak <- which(abs_cols %in% peak_positions)
-          if (length(hit_peak) > 0) { row_z[idx[hit_peak]] <- idx_peak; add_runs(row_key, idx[hit_peak], "peak") }
+          if (length(hit_peak) > 0) add_runs(row_key, idx[hit_peak], "peak")
           hit_binding <- which(abs_cols %in% binding_positions)
-          if (length(hit_binding) > 0) { row_z[idx[hit_binding]] <- idx_binding; add_runs(row_key, idx[hit_binding], "binding") }
+          if (length(hit_binding) > 0) add_runs(row_key, idx[hit_binding], "binding")
           hit_user <- which(abs_cols %in% user_positions)
-          if (length(hit_user) > 0) { add_runs(row_key, idx[hit_user], "user") }
+          if (length(hit_user) > 0) add_runs(row_key, idx[hit_user], "user")
 
           z_list[[length(z_list) + 1]] <- row_z
           text_list[[length(text_list) + 1]] <- row_letters
@@ -1011,10 +1018,10 @@ server <- function(input, output, session) {
       hit_user <- which(cols_all %in% user_positions)
       for (i in seq_len(n_seqs)) {
         row_key <- rows_key[i]
-        if (length(hit_term) > 0)    { z_mat[i, hit_term] <- idx_term;    add_runs(row_key, hit_term, "term") }
-        if (length(hit_peak) > 0)    { z_mat[i, hit_peak] <- idx_peak;    add_runs(row_key, hit_peak, "peak") }
-        if (length(hit_binding) > 0) { z_mat[i, hit_binding] <- idx_binding; add_runs(row_key, hit_binding, "binding") }
-        if (length(hit_user) > 0)    { add_runs(row_key, hit_user, "user") }
+        if (length(hit_term) > 0)    add_runs(row_key, hit_term, "term")
+        if (length(hit_peak) > 0)    add_runs(row_key, hit_peak, "peak")
+        if (length(hit_binding) > 0) add_runs(row_key, hit_binding, "binding")
+        if (length(hit_user) > 0)    add_runs(row_key, hit_user, "user")
       }
       row_index <- setNames(seq_along(rows_key) - 1, rows_key)
       view_range <- unname(msa_window())
@@ -1165,7 +1172,7 @@ server <- function(input, output, session) {
       ts <- tag_sites()
       df <- res$final_df[order(res$final_df$position), ]
       sites <- site_list_for(ts)
-      kind_color <- c(term = "#7a5b00", peak = "#1b7a41")
+      kind_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK)
       site_colors <- kind_color[sites$kind]
 
       tmp_dir <- tempfile("epictope_report_")
