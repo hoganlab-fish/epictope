@@ -193,15 +193,16 @@ contiguous_runs <- function(idx) {
 }
 
 # Classic alignment "wrap" width (matches typical Clustal/EMBOSS text output)
-# -- long alignments are shown as stacked blocks of this many residues
-# instead of one endlessly wide row, so everything fits on screen at once.
+# -- used only in "show full alignment" mode, where long alignments are
+# shown as stacked blocks of this many residues instead of one endlessly
+# wide row, so everything fits on screen at once.
 MSA_WRAP_WIDTH <- 60
 
-# Default windowed view of the alignment: ~300 residues (within the
-# requested 200-400 range) centered on the point of interest, instead of
-# always rendering every homolog's full length at once.
-MSA_DEFAULT_HALF_WIDTH <- 150
-MSA_MAX_HALF_WIDTH <- 200
+# Default (non-full) alignment view: a fixed 50-residue-wide strip centered
+# on the current point of interest -- deliberately NOT zoomable (see the
+# scrollable single-row renderer below); the user scrolls sideways to see
+# more instead of zooming out.
+MSA_DEFAULT_HALF_WIDTH <- 25
 
 # Build the (label, id, position, kind) list for every default site --
 # termini and top peaks -- shared by the top-level nav bar, the score plot,
@@ -330,7 +331,9 @@ ui <- fluidPage(
       });
     }
     $(document).on('shiny:value', function(event) {
-      if (event.name === 'scores_view' || event.name === 'msa_view') {
+      // msa_view intentionally excluded: it's a fixed-width, drag-to-scroll
+      // strip, not a zoomable plot (see the 'not zoomable' note on that panel).
+      if (event.name === 'scores_view') {
         setTimeout(function() { setupWheelZoom(event.target.id); }, 50);
       }
     });
@@ -411,7 +414,8 @@ ui <- fluidPage(
             tags$strong("Tagging-score & feature plot"),
             paste(
               "Top: 'Min score' -- the minimum of the four normalized feature scores below, averaged over a 7-residue window; ranges 0-1, higher = better candidate for inserting an epitope tag without disrupting the protein.",
-              "Bottom: the four underlying features, each normalized 0-1. Entropy: sequence variability across homologs (higher = less conserved = safer). Secondary structure: 1 = loop/coil, 0 = helix/sheet (higher = more tolerant of insertion). RSA: relative solvent accessibility (higher = more surface-exposed). Disorder (DBR): inverted ANCHOR2 disordered-binding-region score (higher = less likely to be a protein-binding interface)."
+              "Bottom: the four underlying features, each normalized 0-1. Entropy: sequence variability across homologs (higher = less conserved = safer). Secondary structure: 1 = loop/coil, 0 = helix/sheet (higher = more tolerant of insertion). RSA: relative solvent accessibility (higher = more surface-exposed). Disorder (DBR): inverted ANCHOR2 disordered-binding-region score (higher = less likely to be a protein-binding interface).",
+              "The thin grey dotted 'current view' line always marks wherever the alignment strip below is centered -- it moves live as you scroll that strip sideways, even before you've clicked anything."
             )
           ),
           tags$div(style = "font-size: 12px; color: #666; margin-bottom: 4px;",
@@ -423,14 +427,14 @@ ui <- fluidPage(
             "Homologous protein sequences (from the configured species list) aligned to your query. Letter colors group amino acids by biochemical property (see legend below) so conserved biochemical character, not just identical letters, is visible at a glance. '-' = gap."
           ),
           tooltip(
-            checkboxInput("msa_full_view", "Show full alignment (disable auto-windowing)", value = FALSE),
-            "By default the alignment below shows only a ~300-residue window centered on the top candidate peak (or wherever you last clicked/selected). Check this to render the entire alignment instead."
+            checkboxInput("msa_full_view", "Show full alignment (disable the scrollable strip)", value = FALSE),
+            "By default the alignment below is a fixed 50-residue-wide strip centered on the top candidate peak (or wherever you last clicked/selected) -- drag it sideways to scroll; it's deliberately not zoomable. Check this box to render the entire alignment as stacked wrapped blocks instead."
           ),
           textOutput("msa_window_label"),
           site_legend_ui(),
           aa_legend_ui(),
           tags$div(style = "font-size: 12px; color: #666; margin: 4px 0;",
-                   "Scroll normally to move the page. Hold Ctrl (⌘ on Mac) + scroll to zoom this plot, drag to box-zoom, or use the toolbar to switch to box/lasso select for tagging a range. Header rows are a position ruler (residue number every 10 columns) -- a position is never more than a few columns from a visible number."),
+                   "Default view: click-and-drag the strip to scroll sideways (it won't zoom -- there's no need, it's a fixed 50-residue window). Vertical page scroll still works normally. 'Show full alignment' switches to a tall, wrapped view of everything at once, with a position ruler (residue number every 10 columns) in each block's header row."),
           uiOutput("msa_view_ui")
         )
       )
@@ -518,42 +522,59 @@ server <- function(input, output, session) {
   tag_range <- reactiveVal(NULL)
   observeEvent(results(), { tag_range(NULL) })
 
+  # Where the user is currently scrolled to in the (non-full) alignment
+  # strip -- updated as they drag it sideways (see the plotly_relayout
+  # observer below). Deliberately NOT read by the alignment panel itself
+  # (that would fight the user's own drag with a server round-trip on every
+  # scroll tick); it only drives the "current position of interest" line on
+  # the score/feature plot, so that line tracks wherever they've scrolled.
+  pan_center <- reactiveVal(NULL)
+  observeEvent(results(), { pan_center(NULL) })
+  observeEvent(event_data("plotly_relayout", source = "msa_view"), {
+    ev <- event_data("plotly_relayout", source = "msa_view")
+    r0 <- ev[["xaxis.range[0]"]]; r1 <- ev[["xaxis.range[1]"]]
+    if (!is.null(r0) && !is.null(r1)) pan_center(mean(c(as.numeric(r0), as.numeric(r1))))
+  })
+
   # All ungapped query-sequence columns in the full alignment (i.e. every
-  # residue position 1..N), independent of any windowing applied for display.
+  # residue position 1..N).
   full_query_cols <- reactive({
     res <- results(); req(res)
     mat_full <- as.matrix(res$msa_res)
     which(mat_full[res$query_id, ] != "-")
   })
 
-  # The [start, end] residue range the alignment panel currently renders.
-  # Default: a ~300-residue window (200-400 range) centered on the user's
-  # current selection if any, else the single best interior peak -- i.e.
-  # "the global maximum that isn't on a terminus". The full-view checkbox
-  # overrides this and shows everything.
+  # The single "current position of interest" -- drives the dynamic line on
+  # the score/feature plot AND the alignment strip's default scroll
+  # position. Priority: an explicit click/range-selection anywhere, else
+  # wherever the user has scrolled the alignment to, else the single best
+  # interior peak (the global maximum that isn't on a terminus).
+  focus_position <- reactive({
+    rng <- tag_range()
+    if (!is.null(rng)) return(mean(rng))
+    pc <- pan_center()
+    if (!is.null(pc)) return(pc)
+    ts <- tryCatch(tag_sites(), error = function(e) NULL)
+    if (is.null(ts)) return(NULL)
+    if (nrow(ts$peaks) > 0) ts$peaks$position[1] else ts$n_term
+  })
+
+  # The fixed-width [lo, hi] view the (non-full) alignment strip opens to.
+  # Always exactly `2 * MSA_DEFAULT_HALF_WIDTH` residues wide -- the strip
+  # is deliberately not zoomable, so this only ever changes by re-centering,
+  # never by resizing (see the scrollable single-row renderer below).
   msa_window <- reactive({
     full_cols <- full_query_cols()
     n_full <- length(full_cols)
     if (isTRUE(input$msa_full_view) || n_full <= 2 * MSA_DEFAULT_HALF_WIDTH) {
       return(c(1, n_full))
     }
-    ts <- tag_sites()
-    rng <- tag_range()
-    if (!is.null(rng)) {
-      center <- mean(rng)
-      half <- max(MSA_DEFAULT_HALF_WIDTH, min(MSA_MAX_HALF_WIDTH, diff(rng) / 2 + 20))
-    } else {
-      center <- if (nrow(ts$peaks) > 0) ts$peaks$position[1] else ts$n_term
-      half <- MSA_DEFAULT_HALF_WIDTH
-    }
-    lo <- max(1, round(center - half)); hi <- min(n_full, round(center + half))
-    width_target <- min(2 * MSA_DEFAULT_HALF_WIDTH, n_full)
-    if ((hi - lo + 1) < width_target) {
-      deficit <- width_target - (hi - lo + 1)
-      if (lo <= 1) hi <- min(n_full, hi + deficit)
-      else if (hi >= n_full) lo <- max(1, lo - deficit)
-    }
-    c(lo, hi)
+    center <- focus_position()
+    if (is.null(center)) center <- 1 + MSA_DEFAULT_HALF_WIDTH
+    lo <- round(center - MSA_DEFAULT_HALF_WIDTH); hi <- round(center + MSA_DEFAULT_HALF_WIDTH)
+    if (lo < 1) { hi <- hi + (1 - lo); lo <- 1 }
+    if (hi > n_full) { lo <- lo - (hi - n_full); hi <- n_full }
+    c(max(1, lo), min(n_full, hi))
   })
 
   output$msa_window_label <- renderText({
@@ -563,7 +584,7 @@ server <- function(input, output, session) {
     if (isTRUE(input$msa_full_view) || (w[1] == 1 && w[2] == n)) {
       sprintf("Showing the full alignment: residues 1-%d.", n)
     } else {
-      sprintf("Showing residues %d-%d of %d (auto-windowed around the point of interest -- check the box above for the full alignment).", w[1], w[2], n)
+      sprintf("Showing residues %d-%d of %d -- drag the strip sideways to scroll (check the box above for the full alignment instead).", w[1], w[2], n)
     }
   })
 
@@ -590,21 +611,16 @@ server <- function(input, output, session) {
   output$score_table <- renderTable(head(results()$final_df, 20))
 
   # --- Alignment layout (shared by the MSA panel and the nav "jump to") ---
-  # Only the currently-windowed columns (see `msa_window`) are materialized,
-  # so switching windows never has to lay out the full alignment underneath.
+  # Always the full, ungapped query-aligned matrix -- "show full alignment"
+  # and the default scrollable strip both read from this and just choose a
+  # different way to lay the same data out (see `output$msa_view`).
   msa_layout <- reactive({
     res <- results()
     mat_full <- as.matrix(res$msa_res)
-    full_cols <- full_query_cols()
-    win <- msa_window()
-    query_cols <- full_cols[win[1]:win[2]]
+    query_cols <- full_query_cols()
     mat <- mat_full[, query_cols, drop = FALSE]
     seq_names <- sub("\\..*$", "", sub(".*/", "", rownames(mat)))
-    n_positions <- length(query_cols)
-    n_seqs <- nrow(mat)
-    n_blocks <- ceiling(n_positions / MSA_WRAP_WIDTH)
-    list(mat = mat, seq_names = seq_names, n_positions = n_positions,
-         n_seqs = n_seqs, n_blocks = n_blocks, window_start = win[1])
+    list(mat = mat, seq_names = seq_names, n_positions = length(query_cols), n_seqs = nrow(mat))
   })
 
   # --- Top-of-tab nav bar: jump straight to any candidate site ------------
@@ -761,9 +777,26 @@ server <- function(input, output, session) {
                 line = list(color = COLOR_USER_TAG, width = 3)))
     } else list()
 
+    # "Current position of interest" -- a thin line that always tracks
+    # wherever the alignment strip below is centered on: a click/selection,
+    # wherever the user has scrolled that strip to, or (with nothing picked
+    # yet) the default top peak. Distinct from the site markers/bands above
+    # (which mark fixed candidate sites) and from the user-tag box (which
+    # only appears after a click) -- this one is always present and moves
+    # live as the alignment strip is scrolled.
+    focus_pos <- focus_position()
+    focus_shapes <- if (!is.null(focus_pos)) {
+      list(list(type = "line", x0 = focus_pos, x1 = focus_pos, y0 = 0, y1 = 1, xref = "x",
+                line = list(color = "#555555", dash = "dot", width = 2)))
+    } else list()
+    focus_annotations <- if (!is.null(focus_pos)) {
+      list(list(x = focus_pos, y = 1, xref = "x", yref = "y", yanchor = "bottom",
+                text = "current view", showarrow = FALSE, font = list(size = 10, color = "#555555")))
+    } else list()
+
     all_shapes <- c(binding_shapes, term_vis$bands, peak_vis$bands,
-                     term_vis$lines, peak_vis$lines, user_shapes)
-    all_annotations <- c(term_vis$annotations, peak_vis$annotations)
+                     term_vis$lines, peak_vis$lines, focus_shapes, user_shapes)
+    all_annotations <- c(term_vis$annotations, peak_vis$annotations, focus_annotations)
     banner <- list(list(x = 0, y = 1.16, xref = "paper", yref = "paper", xanchor = "left",
                          showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
                          text = tag_banner_text(tag_range())))
@@ -789,13 +822,22 @@ server <- function(input, output, session) {
       config(scrollZoom = FALSE, displaylogo = FALSE)  # wheel scrolls the page; Ctrl/Cmd+wheel zooms (see setupWheelZoom JS)
   })
 
-  # --- Panel: raw, colored, wrapped alignment (Fig 2 / Fig 6A style) ------
+  # --- Panel: raw, colored alignment (Fig 2 / Fig 6A style) ---------------
+  # Two render modes share the same colored-cell + grouped-run-outline
+  # scheme (built once below): "show full alignment" stacks the whole thing
+  # into fixed-width wrapped blocks (unchanged from before); the default is
+  # a fixed 50-residue-wide strip on a real position axis that the user
+  # drags sideways to scroll -- deliberately not zoomable.
   output$msa_view_ui <- renderUI({
     req(results())
     ml <- msa_layout()
-    rows_per_block <- ml$n_seqs + 1  # + 1 header/ruler row
-    total_rows <- ml$n_blocks * rows_per_block
-    msa_height <- max(280, total_rows * 20 + 70)
+    if (isTRUE(input$msa_full_view)) {
+      n_blocks <- ceiling(ml$n_positions / MSA_WRAP_WIDTH)
+      total_rows <- n_blocks * (ml$n_seqs + 1)  # +1 header/ruler row per block
+      msa_height <- max(280, total_rows * 20 + 70)
+    } else {
+      msa_height <- max(200, ml$n_seqs * 24 + 90)
+    }
     plotlyOutput("msa_view", height = paste0(msa_height, "px"), width = "100%")
   })
 
@@ -803,8 +845,7 @@ server <- function(input, output, session) {
     res <- results()
     ml <- msa_layout()
     mat <- ml$mat; seq_names <- ml$seq_names
-    n_positions <- ml$n_positions; n_seqs <- ml$n_seqs; n_blocks <- ml$n_blocks
-    abs_offset <- ml$window_start - 1  # local col j -> absolute residue position j + abs_offset
+    n_positions <- ml$n_positions; n_seqs <- ml$n_seqs
 
     letters_present <- sort(unique(as.vector(mat)))
     n_base <- length(letters_present)
@@ -840,8 +881,8 @@ server <- function(input, output, session) {
       rng <- tag_range(); seq(rng[1], rng[2])
     } else integer(0)
 
-    rows_key <- character(0); rows_label <- character(0)
-    z_list <- list(); text_list <- list(); customdata_list <- list()
+    run_color <- c(term = "#7a5b00", peak = "#1b7a41", binding = "#8a1c1c", user = COLOR_USER_TAG)
+    run_width <- c(term = 3, peak = 3, binding = 3, user = 4)
     # Contiguous highlighted runs -- one entry per (row, kind, run), so an
     # entire highlighted stretch (a binding motif, a dragged range) draws as
     # ONE outline box spanning the whole run instead of one square per residue.
@@ -851,109 +892,158 @@ server <- function(input, output, session) {
         runs[[length(runs) + 1]] <<- list(row_key = row_key, start = r["start"], end = r["end"], kind = kind)
       }
     }
-
-    for (b in seq_len(n_blocks)) {
-      start_col <- (b - 1) * MSA_WRAP_WIDTH + 1
-      end_col   <- min(b * MSA_WRAP_WIDTH, n_positions)
-      block_len <- end_col - start_col + 1
-      block_abs <- (start_col:end_col) + abs_offset
-
-      # Ruler header: absolute residue number every 10 positions, plus the
-      # block's very first column -- so a position is never more than ~10
-      # columns from a visible number, no matter where the view is scrolled
-      # (the classic Clustal/EMBOSS wrapped-alignment ruler convention).
-      header_text <- rep("", MSA_WRAP_WIDTH)
-      tick_local <- which(block_abs %% 10 == 0)
-      if (length(tick_local) == 0 || tick_local[1] != 1) tick_local <- c(1, tick_local)
-      header_text[tick_local] <- as.character(block_abs[tick_local])
-
-      rows_key   <- c(rows_key, paste0("__hdr", b))
-      rows_label <- c(rows_label, "")
-      z_list[[length(z_list) + 1]] <- rep(NA_real_, MSA_WRAP_WIDTH)
-      text_list[[length(text_list) + 1]] <- header_text
-      customdata_list[[length(customdata_list) + 1]] <- rep(NA_real_, MSA_WRAP_WIDTH)
-
-      for (i in seq_len(n_seqs)) {
-        row_key <- paste0(seq_names[i], "___b", b)
-        rows_key   <- c(rows_key, row_key)
-        rows_label <- c(rows_label, seq_names[i])
-
-        row_letters <- rep("", MSA_WRAP_WIDTH)
-        row_z <- rep(NA_real_, MSA_WRAP_WIDTH)
-        row_customdata <- rep(NA_real_, MSA_WRAP_WIDTH)
-        idx <- seq_len(block_len)
-        cols <- start_col:end_col
-        abs_cols <- block_abs[idx]
-        row_letters[idx] <- mat[i, cols]
-        row_z[idx] <- letter_idx[mat[i, cols]]
-        row_customdata[idx] <- abs_cols
-
-        # Overlay each highlight category onto this row's cells (color), and
-        # record contiguous runs for the grouped outline boxes added below.
-        hit_term <- which(abs_cols %in% term_positions)
-        if (length(hit_term) > 0) { row_z[idx[hit_term]] <- idx_term; add_runs(row_key, idx[hit_term], "term") }
-        hit_peak <- which(abs_cols %in% peak_positions)
-        if (length(hit_peak) > 0) { row_z[idx[hit_peak]] <- idx_peak; add_runs(row_key, idx[hit_peak], "peak") }
-        hit_binding <- which(abs_cols %in% binding_positions)
-        if (length(hit_binding) > 0) { row_z[idx[hit_binding]] <- idx_binding; add_runs(row_key, idx[hit_binding], "binding") }
-        hit_user <- which(abs_cols %in% user_positions)
-        if (length(hit_user) > 0) { add_runs(row_key, idx[hit_user], "user") }
-
-        z_list[[length(z_list) + 1]] <- row_z
-        text_list[[length(text_list) + 1]] <- row_letters
-        customdata_list[[length(customdata_list) + 1]] <- row_customdata
-      }
+    build_run_shapes <- function(row_index) {
+      shapes <- lapply(runs, function(r) {
+        yi <- row_index[[r$row_key]]
+        list(type = "rect", xref = "x", yref = "y",
+             x0 = r$start - 0.5, x1 = r$end + 0.5, y0 = yi - 0.45, y1 = yi + 0.45,
+             line = list(color = run_color[[r$kind]], width = run_width[[r$kind]]),
+             fillcolor = "rgba(0,0,0,0)")
+      })
+      # User-selection boxes drawn last (on top) so they're never hidden
+      # behind a default site's outline when they overlap.
+      shapes[order(vapply(runs, function(r) r$kind == "user", logical(1)))]
     }
+    hover_suffix <- paste0(
+      "<br><i>Fill color = amino-acid property, or a highlighted site (see legend below)</i>",
+      "<extra></extra>")
 
-    z_mat <- do.call(rbind, z_list)
-    text_mat <- do.call(rbind, text_list)
-    customdata_mat <- do.call(rbind, customdata_list)
+    if (isTRUE(input$msa_full_view)) {
+      # --- Full alignment: stacked MSA_WRAP_WIDTH-wide blocks (unchanged) ---
+      n_blocks <- ceiling(n_positions / MSA_WRAP_WIDTH)
+      rows_key <- character(0); rows_label <- character(0)
+      z_list <- list(); text_list <- list(); customdata_list <- list()
 
-    p <- plot_ly(source = "msa_view") %>%
-      add_trace(
-        x = seq_len(MSA_WRAP_WIDTH), y = rows_key, z = z_mat, text = text_mat,
-        customdata = customdata_mat,
-        texttemplate = "%{text}", textfont = list(size = 11, family = "monospace", color = "black"),
-        type = "heatmap", showscale = FALSE, zmin = 0, zmax = n_total_bins,
-        colorscale = msa_colorscale, xgap = 1, ygap = 1,
-        hovertemplate = paste0(
-          "Position %{customdata}<br>Residue %{text}",
-          "<br><i>Fill color = amino-acid property, or a highlighted site (see legend below)</i>",
-          "<extra></extra>")
-      )
+      for (b in seq_len(n_blocks)) {
+        start_col <- (b - 1) * MSA_WRAP_WIDTH + 1
+        end_col   <- min(b * MSA_WRAP_WIDTH, n_positions)
+        block_len <- end_col - start_col + 1
+        block_abs <- start_col:end_col
 
-    # One outline box per contiguous highlighted run (not per residue) -- a
-    # multi-residue binding motif or dragged selection reads as a single
-    # highlighted region, matching how the score plot bands whole regions.
-    row_index <- setNames(seq_along(rows_key) - 1, rows_key)
-    run_color <- c(term = "#7a5b00", peak = "#1b7a41", binding = "#8a1c1c", user = COLOR_USER_TAG)
-    run_width <- c(term = 3, peak = 3, binding = 3, user = 4)
-    run_shapes <- lapply(runs, function(r) {
-      yi <- row_index[[r$row_key]]
-      list(type = "rect", xref = "x", yref = "y",
-           x0 = r$start - 0.5, x1 = r$end + 0.5, y0 = yi - 0.45, y1 = yi + 0.45,
-           line = list(color = run_color[[r$kind]], width = run_width[[r$kind]]),
-           fillcolor = "rgba(0,0,0,0)")
-    })
-    # User-selection boxes drawn last (on top) so they're never hidden behind
-    # a default site's outline when they overlap.
-    run_shapes <- run_shapes[order(vapply(runs, function(r) r$kind == "user", logical(1)))]
+        # Ruler header: residue number every 10 positions, plus the block's
+        # very first column -- so a position is never more than ~10 columns
+        # from a visible number (classic Clustal/EMBOSS ruler convention).
+        header_text <- rep("", MSA_WRAP_WIDTH)
+        tick_local <- which(block_abs %% 10 == 0)
+        if (length(tick_local) == 0 || tick_local[1] != 1) tick_local <- c(1, tick_local)
+        header_text[tick_local] <- as.character(block_abs[tick_local])
 
-    p %>%
-      layout(
-        xaxis = list(title = "", showticklabels = FALSE),
-        yaxis = list(title = "", autorange = "reversed", tickmode = "array",
-                     tickvals = rows_key, ticktext = rows_label),
-        dragmode = "zoom",
-        margin = list(t = 40),
-        shapes = run_shapes,
-        annotations = list(list(x = 0, y = 1.05, xref = "paper", yref = "paper", xanchor = "left",
-                                 showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
-                                 text = tag_banner_text(tag_range())))
-      ) %>%
-      event_register("plotly_click") %>%
-      event_register("plotly_selected") %>%
-      config(scrollZoom = FALSE, displaylogo = FALSE)  # wheel scrolls the page; Ctrl/Cmd+wheel zooms (see setupWheelZoom JS)
+        rows_key   <- c(rows_key, paste0("__hdr", b))
+        rows_label <- c(rows_label, "")
+        z_list[[length(z_list) + 1]] <- rep(NA_real_, MSA_WRAP_WIDTH)
+        text_list[[length(text_list) + 1]] <- header_text
+        customdata_list[[length(customdata_list) + 1]] <- rep(NA_real_, MSA_WRAP_WIDTH)
+
+        for (i in seq_len(n_seqs)) {
+          row_key <- paste0(seq_names[i], "___b", b)
+          rows_key   <- c(rows_key, row_key)
+          rows_label <- c(rows_label, seq_names[i])
+
+          row_letters <- rep("", MSA_WRAP_WIDTH)
+          row_z <- rep(NA_real_, MSA_WRAP_WIDTH)
+          row_customdata <- rep(NA_real_, MSA_WRAP_WIDTH)
+          idx <- seq_len(block_len)
+          cols <- start_col:end_col
+          abs_cols <- block_abs[idx]
+          row_letters[idx] <- mat[i, cols]
+          row_z[idx] <- letter_idx[mat[i, cols]]
+          row_customdata[idx] <- abs_cols
+
+          hit_term <- which(abs_cols %in% term_positions)
+          if (length(hit_term) > 0) { row_z[idx[hit_term]] <- idx_term; add_runs(row_key, idx[hit_term], "term") }
+          hit_peak <- which(abs_cols %in% peak_positions)
+          if (length(hit_peak) > 0) { row_z[idx[hit_peak]] <- idx_peak; add_runs(row_key, idx[hit_peak], "peak") }
+          hit_binding <- which(abs_cols %in% binding_positions)
+          if (length(hit_binding) > 0) { row_z[idx[hit_binding]] <- idx_binding; add_runs(row_key, idx[hit_binding], "binding") }
+          hit_user <- which(abs_cols %in% user_positions)
+          if (length(hit_user) > 0) { add_runs(row_key, idx[hit_user], "user") }
+
+          z_list[[length(z_list) + 1]] <- row_z
+          text_list[[length(text_list) + 1]] <- row_letters
+          customdata_list[[length(customdata_list) + 1]] <- row_customdata
+        }
+      }
+
+      z_mat <- do.call(rbind, z_list)
+      text_mat <- do.call(rbind, text_list)
+      customdata_mat <- do.call(rbind, customdata_list)
+      row_index <- setNames(seq_along(rows_key) - 1, rows_key)
+
+      plot_ly(source = "msa_view") %>%
+        add_trace(
+          x = seq_len(MSA_WRAP_WIDTH), y = rows_key, z = z_mat, text = text_mat,
+          customdata = customdata_mat,
+          texttemplate = "%{text}", textfont = list(size = 11, family = "monospace", color = "black"),
+          type = "heatmap", showscale = FALSE, zmin = 0, zmax = n_total_bins,
+          colorscale = msa_colorscale, xgap = 1, ygap = 1,
+          hovertemplate = paste0("Position %{customdata}<br>Residue %{text}", hover_suffix)
+        ) %>%
+        layout(
+          xaxis = list(title = "", showticklabels = FALSE),
+          yaxis = list(title = "", autorange = "reversed", tickmode = "array",
+                       tickvals = rows_key, ticktext = rows_label),
+          dragmode = "zoom",
+          margin = list(t = 40),
+          shapes = build_run_shapes(row_index),
+          annotations = list(list(x = 0, y = 1.05, xref = "paper", yref = "paper", xanchor = "left",
+                                   showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
+                                   text = tag_banner_text(tag_range())))
+        ) %>%
+        event_register("plotly_click") %>%
+        event_register("plotly_selected") %>%
+        config(scrollZoom = FALSE, displaylogo = FALSE)  # wheel scrolls the page; Ctrl/Cmd+wheel zooms (see setupWheelZoom JS)
+
+    } else {
+      # --- Default: one continuous row per sequence, real position axis,
+      # fixed-width and drag-to-scroll -- intentionally not zoomable, so
+      # scrolling sideways (not zooming out) is the only way to see more. ---
+      rows_key <- paste0(seq_names, "___r", seq_len(n_seqs))
+      rows_label <- seq_names
+      z_mat <- matrix(letter_idx[mat], nrow = n_seqs, ncol = n_positions)
+      text_mat <- mat
+      customdata_mat <- matrix(rep(seq_len(n_positions), each = n_seqs), nrow = n_seqs, ncol = n_positions)
+
+      cols_all <- seq_len(n_positions)
+      hit_term <- which(cols_all %in% term_positions)
+      hit_peak <- which(cols_all %in% peak_positions)
+      hit_binding <- which(cols_all %in% binding_positions)
+      hit_user <- which(cols_all %in% user_positions)
+      for (i in seq_len(n_seqs)) {
+        row_key <- rows_key[i]
+        if (length(hit_term) > 0)    { z_mat[i, hit_term] <- idx_term;    add_runs(row_key, hit_term, "term") }
+        if (length(hit_peak) > 0)    { z_mat[i, hit_peak] <- idx_peak;    add_runs(row_key, hit_peak, "peak") }
+        if (length(hit_binding) > 0) { z_mat[i, hit_binding] <- idx_binding; add_runs(row_key, hit_binding, "binding") }
+        if (length(hit_user) > 0)    { add_runs(row_key, hit_user, "user") }
+      }
+      row_index <- setNames(seq_along(rows_key) - 1, rows_key)
+      view_range <- unname(msa_window())
+
+      plot_ly(source = "msa_view") %>%
+        add_trace(
+          x = cols_all, y = rows_key, z = z_mat, text = text_mat,
+          customdata = customdata_mat,
+          texttemplate = "%{text}", textfont = list(size = 11, family = "monospace", color = "black"),
+          type = "heatmap", showscale = FALSE, zmin = 0, zmax = n_total_bins,
+          colorscale = msa_colorscale, xgap = 1, ygap = 1,
+          hovertemplate = paste0("Position %{x}<br>Residue %{text}", hover_suffix)
+        ) %>%
+        layout(
+          xaxis = list(title = "Residue position", range = view_range, dtick = 10, fixedrange = FALSE),
+          yaxis = list(title = "", autorange = "reversed", tickmode = "array",
+                       tickvals = rows_key, ticktext = rows_label, fixedrange = TRUE),
+          dragmode = "pan",
+          margin = list(t = 40),
+          shapes = build_run_shapes(row_index),
+          annotations = list(list(x = 0, y = 1.08, xref = "paper", yref = "paper", xanchor = "left",
+                                   showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
+                                   text = tag_banner_text(tag_range())))
+        ) %>%
+        event_register("plotly_click") %>%
+        event_register("plotly_selected") %>%
+        event_register("plotly_relayout") %>%
+        config(scrollZoom = FALSE, displaylogo = FALSE, doubleClick = FALSE,
+               modeBarButtonsToRemove = c("zoom2d", "zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d"))
+    }
   })
 
   # --- Panel: 3D structure (Fig 6D), same default + user highlighting -----
