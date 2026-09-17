@@ -415,7 +415,7 @@ ui <- fluidPage(
             paste(
               "Top: 'Min score' -- the minimum of the four normalized feature scores below, averaged over a 7-residue window; ranges 0-1, higher = better candidate for inserting an epitope tag without disrupting the protein.",
               "Bottom: the four underlying features, each normalized 0-1. Entropy: sequence variability across homologs (higher = less conserved = safer). Secondary structure: 1 = loop/coil, 0 = helix/sheet (higher = more tolerant of insertion). RSA: relative solvent accessibility (higher = more surface-exposed). Disorder (DBR): inverted ANCHOR2 disordered-binding-region score (higher = less likely to be a protein-binding interface).",
-              "The thin grey dotted 'current view' line always marks wherever the alignment strip below is centered -- it moves live as you scroll that strip sideways, even before you've clicked anything."
+              "A solid black vertical line always marks wherever the alignment strip below is centered -- it moves live as you scroll that strip sideways, even before you've clicked anything."
             )
           ),
           tags$div(style = "font-size: 12px; color: #666; margin-bottom: 4px;",
@@ -784,19 +784,20 @@ server <- function(input, output, session) {
     # (which mark fixed candidate sites) and from the user-tag box (which
     # only appears after a click) -- this one is always present and moves
     # live as the alignment strip is scrolled.
+    # Solid black, on top of everything else (including the user-tag box) --
+    # deliberately a color and style used nowhere else in the legend, so it
+    # never blends into a peak/term line even when they land on the exact
+    # same position (the common default case: nothing clicked yet, so the
+    # focus starts out sitting right on the top peak).
     focus_pos <- focus_position()
     focus_shapes <- if (!is.null(focus_pos)) {
       list(list(type = "line", x0 = focus_pos, x1 = focus_pos, y0 = 0, y1 = 1, xref = "x",
-                line = list(color = "#555555", dash = "dot", width = 2)))
-    } else list()
-    focus_annotations <- if (!is.null(focus_pos)) {
-      list(list(x = focus_pos, y = 1, xref = "x", yref = "y", yanchor = "bottom",
-                text = "current view", showarrow = FALSE, font = list(size = 10, color = "#555555")))
+                line = list(color = "#000000", width = 3)))
     } else list()
 
     all_shapes <- c(binding_shapes, term_vis$bands, peak_vis$bands,
-                     term_vis$lines, peak_vis$lines, focus_shapes, user_shapes)
-    all_annotations <- c(term_vis$annotations, peak_vis$annotations, focus_annotations)
+                     term_vis$lines, peak_vis$lines, user_shapes, focus_shapes)
+    all_annotations <- c(term_vis$annotations, peak_vis$annotations)
     banner <- list(list(x = 0, y = 1.16, xref = "paper", yref = "paper", xanchor = "left",
                          showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
                          text = tag_banner_text(tag_range())))
