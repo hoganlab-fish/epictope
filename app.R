@@ -151,6 +151,20 @@ COLOR_PEAK          <- "#00C853"
 COLOR_BINDING       <- "#C62828"
 COLOR_USER_TAG      <- "#2979FF"
 
+# The four normalized per-residue features plotted under the min-score line
+# -- shared by the interactive feature plot and the downloadable static
+# snapshot, so their colors/labels never drift apart between the two.
+FEATURE_SPECS <- list(
+  list(col = "normalized_entropy", name = "Entropy", color = "black",
+       desc = "Sequence variability across homologs (0=conserved, 1=variable); higher = safer to tag"),
+  list(col = "ss_score", name = "Secondary structure", color = "#8B4513",
+       desc = "0=helix/sheet, 1=loop/coil; higher = more tolerant of an insertion"),
+  list(col = "rsa", name = "RSA", color = "forestgreen",
+       desc = "Relative solvent accessibility (0=buried, 1=exposed); higher = more surface-exposed"),
+  list(col = "inv_anchor2", name = "Disorder (DBR)", color = "#008080",
+       desc = "Inverted ANCHOR2 binding-region score; higher = less likely a protein-binding interface")
+)
+
 # A small colored square + label, for building color-key legends.
 color_swatch <- function(color, label) {
   tags$span(
@@ -270,6 +284,94 @@ format_binding_summary <- function(binding_sites) {
   paste(apply(runs, 1, function(r) {
     if (r["start"] == r["end"]) as.character(r["start"]) else sprintf("%d-%d", r["start"], r["end"])
   }), collapse = ", ")
+}
+
+# Static 2-panel score/feature snapshot for the downloadable report -- same
+# shape as the interactive score plot (min score on top, the four
+# normalized features below), with the same site/binding-site markers so
+# it stands on its own outside the app. Base R graphics only, no extra
+# dependency, matching the app's existing report-generation approach.
+render_score_feature_png <- function(path, df, smoothed, sites, binding_positions, query_id,
+                                      width = 1100, height = 750) {
+  kind_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK)
+  site_col <- kind_color[sites$kind]
+  binding_runs <- positions_to_runs(binding_positions)
+
+  png(path, width = width, height = height)
+  on.exit(dev.off(), add = TRUE)
+  par(mfrow = c(2, 1), mar = c(4, 4.5, 3, 1))
+
+  plot(df$position, smoothed, type = "l", xlab = "Residue position",
+       ylab = "Min score (7-res avg)", main = paste("EpicTope tagging score:", query_id), xaxt = "n")
+  axis(1, at = pretty(df$position, n = 10))
+  if (nrow(binding_runs) > 0) {
+    rect(binding_runs$start - 0.5, par("usr")[3], binding_runs$end + 0.5, par("usr")[4],
+         col = grDevices::adjustcolor(COLOR_BINDING, alpha.f = 0.15), border = NA)
+  }
+  abline(v = sites$position, col = site_col, lty = 2, lwd = 1.5)
+  points(sites$position, sites$score, pch = 18, col = site_col, cex = 1.8)
+  text(sites$position, sites$score, labels = sprintf("%s\npos %d", sites$label, sites$position),
+       pos = 3, col = site_col, cex = 0.75, offset = 0.6)
+  legend("bottomright", bty = "o", bg = "white", box.col = "grey80", cex = 0.8,
+         legend = c("N/C-term", "Peak (candidate)", "UniProt binding site"),
+         col = c(COLOR_DEFAULT_SITE, COLOR_PEAK, COLOR_BINDING), lty = c(2, 2, NA), pch = c(18, 18, 15), pt.cex = 1.2)
+
+  plot(df$position, df[[FEATURE_SPECS[[1]]$col]], type = "l", col = FEATURE_SPECS[[1]]$color,
+       ylim = c(0, 1), xlab = "Residue position", ylab = "Normalized score",
+       main = "Underlying normalized features", xaxt = "n")
+  axis(1, at = pretty(df$position, n = 10))
+  if (nrow(binding_runs) > 0) {
+    rect(binding_runs$start - 0.5, 0, binding_runs$end + 0.5, 1,
+         col = grDevices::adjustcolor(COLOR_BINDING, alpha.f = 0.15), border = NA)
+  }
+  for (spec in FEATURE_SPECS[-1]) lines(df$position, df[[spec$col]], col = spec$color)
+  abline(v = sites$position, col = site_col, lty = 2, lwd = 1.5)
+  legend("bottomright", bty = "o", bg = "white", box.col = "grey80", cex = 0.8,
+         legend = vapply(FEATURE_SPECS, function(s) s$name, character(1)),
+         col = vapply(FEATURE_SPECS, function(s) s$color, character(1)), lty = 1, lwd = 2)
+}
+
+# Static raster snapshot of the full alignment for the downloadable report.
+# Same amino-acid coloring as the interactive view, with a clear residue
+# ruler and the same site markers/shading -- no per-cell letters (illegible
+# at whole-protein scale for anything but a short protein); the exact
+# per-residue identities are in the FASTA/CSV already in this archive.
+render_msa_png <- function(path, mat, seq_names, sites, binding_positions, query_id) {
+  n_positions <- ncol(mat); n_seqs <- nrow(mat)
+  letters_present <- sort(unique(as.vector(mat)))
+  letter_idx <- setNames(seq_along(letters_present), letters_present)
+  z_idx <- matrix(letter_idx[mat], nrow = n_seqs, ncol = n_positions)
+  colors <- vapply(letters_present, function(l) {
+    c <- unname(aa_colors[l]); if (is.na(c)) "#BBBBBB" else c
+  }, character(1))
+  # image() plots z[i, j] at (x[i], y[j]); reverse the sequence (row) order
+  # so the first sequence (the query) ends up at the top, matching the
+  # convention every other panel in the app uses.
+  z <- t(z_idx)[, n_seqs:1, drop = FALSE]
+
+  width_px <- max(1000, min(4000, round(n_positions * 3)))
+  height_px <- max(250, n_seqs * 28 + 140)
+  png(path, width = width_px, height = height_px)
+  on.exit(dev.off(), add = TRUE)
+  par(mar = c(4, 9, 3, 1))
+  image(x = seq_len(n_positions), y = seq_len(n_seqs), z = z,
+        col = colors, breaks = seq(0.5, length(colors) + 0.5, by = 1),
+        axes = FALSE, xlab = "Residue position", ylab = "",
+        main = paste("EpicTope alignment:", query_id))
+  axis(1, at = pretty(seq_len(n_positions), n = 15))
+  axis(2, at = seq_len(n_seqs), labels = rev(seq_names), las = 1, cex.axis = 0.8)
+  box()
+
+  binding_runs <- positions_to_runs(binding_positions)
+  if (nrow(binding_runs) > 0) {
+    rect(binding_runs$start - 0.5, 0.5, binding_runs$end + 0.5, n_seqs + 0.5,
+         col = grDevices::adjustcolor(COLOR_BINDING, alpha.f = 0.25), border = NA)
+  }
+  kind_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK)
+  site_col <- kind_color[sites$kind]
+  abline(v = sites$position, col = site_col, lty = 2, lwd = 1.5)
+  text(sites$position, n_seqs + 0.8, labels = sprintf("%s\npos %d", sites$label, sites$position),
+       col = site_col, cex = 0.7, xpd = NA)
 }
 
 # A jump-to-position button styled like an actionButton but with a
@@ -722,17 +824,7 @@ server <- function(input, output, session) {
       layout(yaxis = list(title = "Min score (7-res avg)"))
 
     p2 <- plot_ly(source = "scores_view")
-    feat_specs <- list(
-      list(col = "normalized_entropy", name = "Entropy", color = "black",
-           desc = "Sequence variability across homologs (0=conserved, 1=variable); higher = safer to tag"),
-      list(col = "ss_score", name = "Secondary structure", color = "#8B4513",
-           desc = "0=helix/sheet, 1=loop/coil; higher = more tolerant of an insertion"),
-      list(col = "rsa", name = "RSA", color = "forestgreen",
-           desc = "Relative solvent accessibility (0=buried, 1=exposed); higher = more surface-exposed"),
-      list(col = "inv_anchor2", name = "Disorder (DBR)", color = "#008080",
-           desc = "Inverted ANCHOR2 binding-region score; higher = less likely a protein-binding interface")
-    )
-    for (spec in feat_specs) {
+    for (spec in FEATURE_SPECS) {
       p2 <- p2 %>% add_trace(
         data = df, x = ~position, y = df[[spec$col]], type = "scatter", mode = "lines+markers",
         name = spec$name, line = list(color = spec$color),
@@ -813,6 +905,16 @@ server <- function(input, output, session) {
                          showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
                          text = tag_banner_text(tag_range())))
 
+    # IMPORTANT: `shapes` must be attached to p1/p2 individually, BEFORE
+    # subplot() merges them -- a `layout(shapes = ...)` call chained AFTER
+    # subplot() is silently dropped by plotly (confirmed against a minimal
+    # reproduction; this is why every band/dashed-line here was invisible
+    # even though the site markers and text annotations, which merge fine
+    # post-subplot, looked correct). Give each row's copy that row's own
+    # "y" before the merge; subplot() remaps p2's "y" to "y2" for us.
+    p1 <- p1 %>% layout(shapes = lapply(all_shapes, function(s) { s$yref <- "y"; s }))
+    p2 <- p2 %>% layout(shapes = lapply(all_shapes, function(s) { s$yref <- "y"; s }))
+
     combined <- subplot(p1, p2, nrows = 2, shareX = TRUE, titleY = TRUE, heights = c(0.4, 0.6))
     combined$x$source <- "scores_view"
     combined %>%
@@ -821,12 +923,6 @@ server <- function(input, output, session) {
         dragmode = "zoom",   # drag to zoom; use the toolbar to switch to box/lasso select for tagging a range
         legend = list(orientation = "h", y = 1.1),
         margin = list(t = 90),
-        # shapes/annotations need a yref per row (y for row1, y2 for row2) --
-        # duplicate each shape onto both rows so it visibly spans the full view.
-        shapes = c(
-          lapply(all_shapes, function(s) { s$yref <- "y"; s }),
-          lapply(all_shapes, function(s) { s$yref <- "y2"; s })
-        ),
         annotations = c(lapply(all_annotations, function(a) { a$yref <- "y"; a }), banner)
       ) %>%
       event_register("plotly_click") %>%
@@ -1170,10 +1266,9 @@ server <- function(input, output, session) {
     content = function(file) {
       res <- results()
       ts <- tag_sites()
+      ml <- msa_layout()
       df <- res$final_df[order(res$final_df$position), ]
       sites <- site_list_for(ts)
-      kind_color <- c(term = COLOR_DEFAULT_SITE, peak = COLOR_PEAK)
-      site_colors <- kind_color[sites$kind]
 
       tmp_dir <- tempfile("epictope_report_")
       dir.create(tmp_dir)
@@ -1189,21 +1284,21 @@ server <- function(input, output, session) {
       struct_name <- paste0(res$query_id, "_structure.", struct_ext)
       file.copy(res$alphafold_file, file.path(tmp_dir, struct_name), overwrite = TRUE)
 
-      # 4. Static min-score plot (base R graphics only -- no extra dependency)
-      png(file.path(tmp_dir, "min_score_plot.png"), width = 1000, height = 400)
-      plot(df$position, ts$smoothed, type = "l", xlab = "Residue position",
-           ylab = "Min score (7-res avg)", main = paste("EpicTope min-score profile:", res$query_id))
-      if (length(res$binding_sites) > 0) {
-        binding_runs <- positions_to_runs(res$binding_sites)
-        rect(binding_runs$start - 0.5, par("usr")[3], binding_runs$end + 0.5, par("usr")[4],
-             col = grDevices::adjustcolor(COLOR_BINDING, alpha.f = 0.15), border = NA)
-      }
-      abline(v = sites$position, col = site_colors, lty = 2)
-      points(sites$position, sites$score, pch = 18, col = site_colors, cex = 1.6)
-      text(sites$position, sites$score, labels = sites$label, pos = 3, col = site_colors, cex = 0.8)
-      dev.off()
+      # 4. Static snapshots of the two plots -- these are frozen at whatever
+      # the pipeline produced (not the live windowed/zoomed view), but carry
+      # the exact same site/binding-site markers and residue-position axes
+      # as the interactive versions, clearly labeled either way.
+      render_score_feature_png(file.path(tmp_dir, "score_feature_plot.png"),
+                                df, ts$smoothed, sites, res$binding_sites, res$query_id)
+      render_msa_png(file.path(tmp_dir, "alignment_plot.png"),
+                      ml$mat, ml$seq_names, sites, res$binding_sites, res$query_id)
+      # Note: the interactive 3D structure view can't be captured as a
+      # static image from the server side (it's rendered client-side in
+      # WebGL) -- the raw structure file above, plus the site/position
+      # tables here, cover the same information; open the structure file in
+      # any viewer and select the listed residues to reproduce it.
 
-      # 5. Self-contained HTML summary report (relative image path -> works
+      # 5. Self-contained HTML summary report (relative image paths -> work
       #    once the zip is extracted, no bundling/knitting dependency needed)
       kind_label <- c(term = "Terminus", peak = "Peak (candidate)")
       tag_rows <- paste0(
@@ -1234,14 +1329,19 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
 <h2>UniProt binding-site residues</h2>
 <p>%s</p>
 
-<h2>Min-score profile</h2>
-<img src="min_score_plot.png" alt="Min-score profile">
+<h2>Tagging score &amp; feature profile</h2>
+<img src="score_feature_plot.png" alt="Tagging score and feature profile">
+
+<h2>Alignment</h2>
+<img src="alignment_plot.png" alt="Alignment overview">
+<p style="font-size:0.85em;color:#666;">Residue letters aren\'t legible at this scale for a long protein -- see the FASTA/CSV files below for exact per-residue identities.</p>
 
 <h2>Run summary</h2>
 <ul>
 <li>Protein length analyzed: %d residues</li>
 <li>Homologous sequences used in the alignment: %d</li>
 <li>Structure file: %s (included in this archive)</li>
+<li>3D structure view: not included as a static image (it\'s rendered client-side in the app) -- open the structure file above in any viewer (e.g. ChimeraX, PyMOL) and select the candidate/binding-site residues listed above to reproduce it.</li>
 </ul>
 
 <h2>Included files</h2>
@@ -1249,7 +1349,8 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
 <li><b>%s_scores.csv</b> — full per-residue feature/score table</li>
 <li><b>%s_alignment.fasta</b> — the multiple sequence alignment used for the entropy calculation</li>
 <li><b>%s</b> — the AlphaFold structure used for DSSP/RSA and the 3D view</li>
-<li><b>min_score_plot.png</b> — static copy of the min-score profile above</li>
+<li><b>score_feature_plot.png</b> — static copy of the tagging-score/feature profile above</li>
+<li><b>alignment_plot.png</b> — static copy of the alignment overview above</li>
 </ul>
 </body></html>',
         res$query_id, res$query_id, format(Sys.time(), "%Y-%m-%d %H:%M"),
