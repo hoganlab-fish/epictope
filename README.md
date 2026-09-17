@@ -8,7 +8,7 @@
     <img src="https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg?style=for-the-badge" alt="CC BY 4.0">
 </a>
 
-<a href="https://github.com/hoganlab-fish/DR_GRCz11.102_mafa">
+<a href="https://github.com/hoganlab-fish/epictope">
     <img src="https://img.shields.io/badge/GitHub-hoganlab--fish%2Fepictope-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
 </a>
 
