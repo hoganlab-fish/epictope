@@ -1293,7 +1293,12 @@ server <- function(input, output, session) {
 
   # --- Full report: CSV + FASTA alignment + structure + plot + HTML summary ---
   output$download_report <- downloadHandler(
-    filename = function() paste0(results()$query_id, "_epictope_report.zip"),
+    # Filename includes a timestamp so every download is a distinct URL --
+    # browsers key their cache on the download filename/URL, so a static
+    # name here means a second click can silently serve a stale cached copy
+    # instead of hitting the server again for a fresh report.
+    filename = function() paste0(results()$query_id, "_epictope_report_",
+                                  format(Sys.time(), "%Y%m%d_%H%M%S"), ".zip"),
     content = function(file) {
       res <- results()
       ts <- tag_sites()
@@ -1384,7 +1389,7 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
 <li><b>alignment_plot.png</b> — static copy of the alignment overview above</li>
 </ul>
 </body></html>',
-        res$query_id, res$query_id, format(Sys.time(), "%Y-%m-%d %H:%M"),
+        res$query_id, res$query_id, format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
         tag_rows, binding_summary, nrow(df), n_homologs, struct_name,
         res$query_id, res$query_id, struct_name
       )
