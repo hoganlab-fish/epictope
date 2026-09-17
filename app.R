@@ -307,6 +307,11 @@ render_score_feature_png <- function(path, df, smoothed, sites, binding_position
   if (nrow(binding_runs) > 0) {
     rect(binding_runs$start - 0.5, par("usr")[3], binding_runs$end + 0.5, par("usr")[4],
          col = grDevices::adjustcolor(COLOR_BINDING, alpha.f = 0.15), border = NA)
+    # Labeled explicitly -- a real, curated UniProt annotation independent of
+    # the computed peaks/termini, so it's never mistaken for one of them.
+    binding_mid <- (binding_runs$start + binding_runs$end) / 2
+    text(binding_mid, par("usr")[4] - 0.04 * diff(par("usr")[3:4]),
+         labels = "UniProt\nbinding site", col = COLOR_BINDING, cex = 0.6, font = 2)
   }
   abline(v = sites$position, col = site_col, lty = 2, lwd = 1.5)
   points(sites$position, sites$score, pch = 18, col = site_col, cex = 1.8)
@@ -506,7 +511,7 @@ ui <- fluidPage(
             span("Combined view ⓘ"),
             paste(
               "3D structure, min-score/feature plots, and the raw alignment, all on one page and linked together.",
-              "Amber = sequence termini, green = top scoring peaks (good tag candidates), red = curated UniProt binding-site residues (avoid tagging these) -- use the buttons at the top to jump straight to any of them.",
+              "Amber = sequence termini, green = top scoring peaks (good tag candidates) -- both computed from the min-score curve. Red = curated UniProt binding-site residues, labeled directly on the score plot -- a real, independent annotation from UniProt (not computed, and not expected to line up with a peak) marking a known functional site to avoid tagging over. Use the buttons at the top to jump straight to any of the computed sites.",
               "Scrolling the page always works normally over any plot; hold Ctrl (Cmd on Mac) and scroll to zoom that plot instead, or drag a box / use the toolbar to zoom or select a range.",
               "A click (or a range selection) on any panel highlights that same residue or range -- in blue, flashing -- clearly on every other panel, including the 3D structure (with a residue-number label)."
             )
@@ -862,12 +867,23 @@ server <- function(input, output, session) {
 
     # Curated UniProt binding-site residues -- drawn as wide, low-opacity
     # red bands (behind everything else) so tagging near a known functional
-    # site is obvious without needing per-residue diamonds/labels.
+    # site is obvious. Independent of the computed peaks/termini above (this
+    # is a real, curated annotation from UniProt, not something derived
+    # from the min-score curve) -- labeled explicitly so it's never mistaken
+    # for one of the computed sites just because it's also colored/dashed.
     binding_runs <- positions_to_runs(res$binding_sites)
     binding_shapes <- if (nrow(binding_runs) > 0) {
       lapply(seq_len(nrow(binding_runs)), function(i) {
         list(type = "rect", x0 = binding_runs$start[i] - 0.5, x1 = binding_runs$end[i] + 0.5,
              y0 = 0, y1 = 1, xref = "x", fillcolor = COLOR_BINDING, opacity = 0.18, line = list(width = 0))
+      })
+    } else list()
+    binding_annotations <- if (nrow(binding_runs) > 0) {
+      lapply(seq_len(nrow(binding_runs)), function(i) {
+        s <- binding_runs$start[i]; e <- binding_runs$end[i]
+        label <- if (s == e) sprintf("UniProt binding site (pos %d)", s) else sprintf("UniProt binding site (%d-%d)", s, e)
+        list(x = (s + e) / 2, y = 1.02, xref = "x", yref = "paper", xanchor = "center",
+             text = label, showarrow = FALSE, font = list(size = 10, color = COLOR_BINDING))
       })
     } else list()
 
@@ -900,6 +916,9 @@ server <- function(input, output, session) {
 
     all_shapes <- c(binding_shapes, term_vis$bands, peak_vis$bands,
                      term_vis$lines, peak_vis$lines, user_shapes, focus_shapes)
+    # binding_annotations already carry their own yref="paper" (they sit
+    # above the whole figure, not anchored to either row's score axis) --
+    # kept separate so the row-anchoring override below doesn't clobber it.
     all_annotations <- c(term_vis$annotations, peak_vis$annotations)
     banner <- list(list(x = 0, y = 1.16, xref = "paper", yref = "paper", xanchor = "left",
                          showarrow = FALSE, font = list(size = 12, color = COLOR_USER_TAG),
@@ -923,7 +942,7 @@ server <- function(input, output, session) {
         dragmode = "zoom",   # drag to zoom; use the toolbar to switch to box/lasso select for tagging a range
         legend = list(orientation = "h", y = 1.1),
         margin = list(t = 90),
-        annotations = c(lapply(all_annotations, function(a) { a$yref <- "y"; a }), banner)
+        annotations = c(lapply(all_annotations, function(a) { a$yref <- "y"; a }), binding_annotations, banner)
       ) %>%
       event_register("plotly_click") %>%
       event_register("plotly_selected") %>%
@@ -1219,6 +1238,18 @@ server <- function(input, output, session) {
         addRepresentation("spacefill", param = list(
           name = "uniprot_binding", sele = paste(res$binding_sites, collapse = " or "),
           colorValue = COLOR_BINDING, opacity = 0.75))
+      # One "UniProt binding site" text label per contiguous run (not per
+      # residue -- a resno label on every residue would clutter a multi-
+      # residue site) so it reads as its own annotation, not an unlabeled
+      # blob easily mistaken for a computed peak/term site.
+      binding_runs <- positions_to_runs(res$binding_sites)
+      for (i in seq_len(nrow(binding_runs))) {
+        mid <- round((binding_runs$start[i] + binding_runs$end[i]) / 2)
+        viewer <- viewer %>%
+          addRepresentation("label", param = list(
+            sele = as.character(mid), labelType = "text", labelText = "UniProt binding site",
+            color = COLOR_BINDING, showBackground = TRUE, backgroundColor = "black", backgroundOpacity = 0.5))
+      }
     }
 
     viewer %>% stageParameters(backgroundColor = "white")
