@@ -560,10 +560,14 @@ ui <- fluidPage(
 
 # MobiDB's precomputed ANCHOR binding regions as a per-residue anchor2 vector:
 # 1 inside a region, 0 outside. Coarser than IUPred2A's 0-1 scores, but the
-# same predictor. Errors if MobiDB has no entry or its sequence differs from
-# UniProt's (region positions would then be misaligned).
+# same predictor. Read from the local cache (data/mobidb/<accession>.json,
+# filled by fetch_mobidb_cache.R) first, else from the MobiDB API. Errors if
+# MobiDB has no entry or its sequence differs from UniProt's (region positions
+# would then be misaligned).
 mobidb_anchor <- function(query, sequence) {
-  entry <- jsonlite::fromJSON(paste0("https://mobidb.org/api/download?acc=", query, "&format=json"))
+  cached <- file.path(dataFolder, "mobidb", paste0(query, ".json"))
+  entry <- jsonlite::fromJSON(if (file.exists(cached)) cached else
+    paste0("https://mobidb.org/api/download?acc=", query, "&format=json"))
   if (!identical(entry$sequence, sequence)) stop("MobiDB sequence differs from UniProt")
   anchor2 <- numeric(nchar(sequence))
   regions <- entry[["prediction-lip-anchor"]]$regions

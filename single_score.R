@@ -62,7 +62,10 @@ iupred_df <- tryCatch(iupredAnchor(query), error = function(e) {
     message("WARNING. IUPred2A SERVER UNREACHABLE (", conditionMessage(e), ").")
     aa <- strsplit(uniprot_data$Sequence, "")[[1]]
     anchor2 <- tryCatch({
-        entry <- jsonlite::fromJSON(paste0("https://mobidb.org/api/download?acc=", query, "&format=json"))
+        # local cache (filled by fetch_mobidb_cache.R) first, else the MobiDB API
+        cached <- file.path(dataFolder, "mobidb", paste0(query, ".json"))
+        entry <- jsonlite::fromJSON(if (file.exists(cached)) cached else
+            paste0("https://mobidb.org/api/download?acc=", query, "&format=json"))
         if (!identical(entry$sequence, uniprot_data$Sequence)) stop("MobiDB sequence differs from UniProt")
         anchor2 <- numeric(length(aa))
         regions <- entry[["prediction-lip-anchor"]]$regions
