@@ -576,6 +576,22 @@ fetch_iupred <- function(query, sequence, timeout = 20) {
   )
 }
 
+# AlphaFold DB answers 403 to curl/httr's default User-Agent, so
+# epictope::fetch_alphafold() returns NA for anything not already cached.
+# Same download (and cache path), but with an explicit User-Agent.
+fetch_structure <- function(protein_id) {
+  output_file <- file.path(model_folder, paste0("AF-", protein_id, "-F1-model_v6.cif"))
+  if (file.exists(output_file)) return(output_file)
+  resp <- httr::GET(paste0("https://alphafold.ebi.ac.uk/files/", basename(output_file)),
+                    httr::user_agent("epictope (+https://github.com/FriedbergLab/EpicTope)"))
+  if (httr::http_error(resp)) {
+    stop("No AlphaFold structure found for ", protein_id,
+         " (HTTP ", httr::status_code(resp), "). Upload a structure file instead.")
+  }
+  writeBin(httr::content(resp, as = "raw"), output_file)
+  output_file
+}
+
 server <- function(input, output, session) {
 
   updateSelectizeInput(session, "query", choices = protein_choices, server = TRUE, selected = character(0))
@@ -595,7 +611,7 @@ server <- function(input, output, session) {
       } else {
         af_id <- uniprot_data$AlphaFoldDB
         if (is.na(af_id)) af_id <- input$query
-        fetch_alphafold(gsub(";", "", af_id))
+        fetch_structure(gsub(";", "", af_id))
       }
 
       dssp_res <- dssp_command(alphafold_file)

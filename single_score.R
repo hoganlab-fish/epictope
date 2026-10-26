@@ -29,7 +29,19 @@ if (is.null(alphafold_file_custom)) {
     if(is.na(uniprot_data$AlphaFoldDB)){
       message("WARNING. NO CROSSREFERENCE ALPHAFOLD ENTRY FOUND; ATTEMPTING DIRECT LOOKUP. RESULTS MAY BE LOW CONFIDENCE.")
       uniprot_data$AlphaFoldDB <- query}
-    alphafold_file <- fetch_alphafold(gsub(";", "", uniprot_data$AlphaFoldDB))
+    # AlphaFold DB answers 403 to curl/httr's default User-Agent, which makes
+    # fetch_alphafold() return NA; download with an explicit User-Agent instead.
+    af_id <- gsub(";", "", uniprot_data$AlphaFoldDB)
+    alphafold_file <- file.path(model_folder, paste0("AF-", af_id, "-F1-model_v6.cif"))
+    if (!file.exists(alphafold_file)) {
+        resp <- httr::GET(paste0("https://alphafold.ebi.ac.uk/files/", basename(alphafold_file)),
+                          httr::user_agent("epictope (+https://github.com/FriedbergLab/EpicTope)"))
+        if (httr::http_error(resp)) {
+            alphafold_file <- NA
+        } else {
+            writeBin(httr::content(resp, as = "raw"), alphafold_file)
+        }
+    }
     if(is.na(alphafold_file)){stop("No alphafold file found for ", query)}
 } else {
     alphafold_file <- alphafold_file_custom
