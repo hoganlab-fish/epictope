@@ -558,20 +558,41 @@ ui <- fluidPage(
   )
 )
 
+# MobiDB's precomputed ANCHOR binding regions as a per-residue anchor2 vector:
+# 1 inside a region, 0 outside. Coarser than IUPred2A's 0-1 scores, but the
+# same predictor. Errors if MobiDB has no entry or its sequence differs from
+# UniProt's (region positions would then be misaligned).
+mobidb_anchor <- function(query, sequence) {
+  entry <- jsonlite::fromJSON(paste0("https://mobidb.org/api/download?acc=", query, "&format=json"))
+  if (!identical(entry$sequence, sequence)) stop("MobiDB sequence differs from UniProt")
+  anchor2 <- numeric(nchar(sequence))
+  regions <- entry[["prediction-lip-anchor"]]$regions
+  for (i in seq_len(NROW(regions))) anchor2[regions[i, 1]:regions[i, 2]] <- 1
+  anchor2
+}
+
 # IUPred2A is an external web service that is sometimes down or hangs.
-# Rather than failing the whole pipeline, fall back to anchor2 = 0 at every
-# position (no predicted binding region). A constant shifts every position's
-# sum_score equally, so the ranking still reflects the other three features.
+# Rather than failing the whole pipeline, fall back to MobiDB's ANCHOR regions,
+# then to anchor2 = 0 at every position (no predicted binding region). A
+# constant shifts every position's sum_score equally, so the ranking still
+# reflects the other three features. `source` says which one was used.
 fetch_iupred <- function(query, sequence, timeout = 20) {
   old_opts <- options(timeout = timeout)
   on.exit(options(old_opts))
+  iupred_err <- NULL
+  df <- tryCatch(iupredAnchor(query),
+                 error = function(e) { iupred_err <<- conditionMessage(e); NULL })
+  if (!is.null(df)) return(list(df = df, source = "iupred"))
+
+  aa <- strsplit(sequence, "")[[1]]
+  fallback_df <- function(anchor2) {
+    data.frame(position = seq_along(aa), aa = aa, iupred2 = NA_real_, anchor2 = anchor2)
+  }
   tryCatch(
-    list(df = iupredAnchor(query), ok = TRUE),
+    list(df = fallback_df(mobidb_anchor(query, sequence)), source = "mobidb", msg = iupred_err),
     error = function(e) {
-      aa <- strsplit(sequence, "")[[1]]
-      list(df = data.frame(position = seq_along(aa), aa = aa,
-                           iupred2 = NA_real_, anchor2 = 0),
-           ok = FALSE, msg = conditionMessage(e))
+      list(df = fallback_df(0), source = "none",
+           msg = paste0(iupred_err, "; MobiDB: ", sub("\n.*", "", conditionMessage(e))))
     }
   )
 }
@@ -620,10 +641,13 @@ server <- function(input, output, session) {
       dssp_df  <- parse_dssp(dssp_res)
       iupred_res <- fetch_iupred(input$query, uniprot_data$Sequence)
       iupred_df <- iupred_res$df
-      if (!iupred_res$ok) {
+      if (iupred_res$source != "iupred") {
         showNotification(
           paste0("IUPred2A server unreachable (", iupred_res$msg, "). ",
-                 "Continuing without disorder/binding-region data: the Disorder (DBR) track is a flat placeholder."),
+                 if (iupred_res$source == "mobidb")
+                   "Using MobiDB's precomputed ANCHOR binding regions instead: the Disorder (DBR) track is on/off per region rather than a per-residue score."
+                 else
+                   "Continuing without disorder/binding-region data: the Disorder (DBR) track is a flat placeholder."),
           type = "warning", duration = NULL)
       }
 
