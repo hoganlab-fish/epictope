@@ -576,20 +576,22 @@ fetch_iupred <- function(query, sequence, timeout = 20) {
   )
 }
 
-# AlphaFold DB answers 403 to curl/httr's default User-Agent, so
-# epictope::fetch_alphafold() returns NA for anything not already cached.
-# Same download (and cache path), but with an explicit User-Agent.
+# AlphaFold DB structures come from the local cache in model_folder first
+# (filled from the EBI FTP proteome archive); only a file missing on disk is
+# fetched online. Each online lookup waits a random 10-30 s first so we don't
+# hammer alphafold.ebi.ac.uk.
+alphafold_lookup_delay <- function() Sys.sleep(stats::runif(1, 10, 30))
+
 fetch_structure <- function(protein_id) {
   output_file <- file.path(model_folder, paste0("AF-", protein_id, "-F1-model_v6.cif"))
   if (file.exists(output_file)) return(output_file)
-  resp <- httr::GET(paste0("https://alphafold.ebi.ac.uk/files/", basename(output_file)),
-                    httr::user_agent("epictope (+https://github.com/FriedbergLab/EpicTope)"))
-  if (httr::http_error(resp)) {
-    stop("No AlphaFold structure found for ", protein_id,
-         " (HTTP ", httr::status_code(resp), "). Upload a structure file instead.")
+  alphafold_lookup_delay()
+  res <- fetch_alphafold(protein_id)
+  if (!is.character(res) || is.na(res)) {
+    stop("No AlphaFold structure for ", protein_id, " on disk (", output_file,
+         ") or online. Add it to the cache from the EBI FTP archive, or upload a structure file.")
   }
-  writeBin(httr::content(resp, as = "raw"), output_file)
-  output_file
+  res
 }
 
 server <- function(input, output, session) {
@@ -1238,6 +1240,7 @@ server <- function(input, output, session) {
       pdb_local <- sub("\\.(cif|mmcif|mcif)$", ".pdb", struct_file, ignore.case = TRUE)
       got_pdb <- tryCatch({
         if (!file.exists(pdb_local)) {
+          alphafold_lookup_delay()
           download.file(pdb_url, pdb_local, quiet = TRUE, mode = "wb")
         }
         file.exists(pdb_local) && file.info(pdb_local)$size > 0
