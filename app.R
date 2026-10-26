@@ -558,6 +558,24 @@ ui <- fluidPage(
   )
 )
 
+# IUPred2A is an external web service that is sometimes down or hangs.
+# Rather than failing the whole pipeline, fall back to anchor2 = 0 at every
+# position (no predicted binding region). A constant shifts every position's
+# sum_score equally, so the ranking still reflects the other three features.
+fetch_iupred <- function(query, sequence, timeout = 20) {
+  old_opts <- options(timeout = timeout)
+  on.exit(options(old_opts))
+  tryCatch(
+    list(df = iupredAnchor(query), ok = TRUE),
+    error = function(e) {
+      aa <- strsplit(sequence, "")[[1]]
+      list(df = data.frame(position = seq_along(aa), aa = aa,
+                           iupred2 = NA_real_, anchor2 = 0),
+           ok = FALSE, msg = conditionMessage(e))
+    }
+  )
+}
+
 server <- function(input, output, session) {
 
   updateSelectizeInput(session, "query", choices = protein_choices, server = TRUE, selected = character(0))
@@ -582,7 +600,14 @@ server <- function(input, output, session) {
 
       dssp_res <- dssp_command(alphafold_file)
       dssp_df  <- parse_dssp(dssp_res)
-      iupred_df <- iupredAnchor(input$query)
+      iupred_res <- fetch_iupred(input$query, uniprot_data$Sequence)
+      iupred_df <- iupred_res$df
+      if (!iupred_res$ok) {
+        showNotification(
+          paste0("IUPred2A server unreachable (", iupred_res$msg, "). ",
+                 "Continuing without disorder/binding-region data: the Disorder (DBR) track is a flat placeholder."),
+          type = "warning", duration = NULL)
+      }
 
       seq <- Biostrings::AAStringSet(uniprot_data$Sequence, use.names = TRUE)
       aa_files <- list.files(cds_folder, pattern = "\\.all\\.fa$",

@@ -47,7 +47,15 @@ if (!is.null(alphafold_file_custom) & length(args) == 2) {
 }
 
 # retrieve iupred/anchor2 disordered binding regions
-iupred_df <- iupredAnchor(query)
+# IUPred2A web service is sometimes down; fall back to anchor2 = 0 (no predicted
+# binding region) so the run completes. A constant doesn't change score ranking.
+old_opts <- options(timeout = 20)
+iupred_df <- tryCatch(iupredAnchor(query), error = function(e) {
+    message("WARNING. IUPred2A SERVER UNREACHABLE (", conditionMessage(e), "). CONTINUING WITHOUT DISORDER/BINDING-REGION DATA.")
+    aa <- strsplit(uniprot_data$Sequence, "")[[1]]
+    data.frame(position = seq_along(aa), aa = aa, iupred2 = NA_real_, anchor2 = 0)
+})
+options(old_opts)
 
 # blast query aa sequence
 seq <- Biostrings::AAStringSet(uniprot_data$Sequence, start=NA, end=NA, width=NA, use.names=TRUE)
