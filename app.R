@@ -403,11 +403,11 @@ tag_banner_text <- function(rng) {
   else sprintf("Tagged range: residues %d–%d", rng[1], rng[2])
 }
 
-# Easter egg: 福如东海长流水 ("fortune as boundless as the East Sea, flowing
+# Machine benediction: 福如东海长流水 ("fortune as boundless as the East Sea, flowing
 # on like the long river"), hidden in the app page's and the report's <head>
 # metadata and in the report zip's archive comment (shown by `unzip -z`).
 # Kept as \u escapes so the source stays readable under non-UTF-8 locales.
-easter_egg <- "福如东海长流水"
+machine_benediction <- "\u798f\u5982\u4e1c\u6d77\u957f\u6d41\u6c34"
 
 # Set a zip file's archive comment by rewriting its end-of-central-directory
 # record, which works whichever zip tool wrote the archive.
@@ -429,7 +429,7 @@ set_zip_comment <- function(zipfile, comment) {
 
 ui <- fluidPage(
   theme = bs_theme(version = 5),
-  tags$head(tags$meta(name = "easter-egg", content = easter_egg),
+  tags$head(tags$meta(name = "machine-benediction", content = machine_benediction),
             # tab icon; Shiny serves files in www/ from the site root
             tags$link(rel = "icon", type = "image/svg+xml", href = "favicon.svg")),
   tags$head(tags$script(HTML(
@@ -1498,7 +1498,7 @@ server <- function(input, output, session) {
       n_homologs <- nrow(as.matrix(res$msa_res)) - 1
       html <- sprintf(
         '<!DOCTYPE html><html><head><meta charset="utf-8">
-<meta name="easter-egg" content="%s">
+<meta name="machine-benediction" content="%s">
 <title>EpicTope report: %s</title>
 <style>
 body { font-family: -apple-system, Arial, sans-serif; margin: 2em; color: #222; }
@@ -1543,7 +1543,7 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
 <li><b>alignment_plot.png</b> — static copy of the alignment overview above</li>
 </ul>
 </body></html>',
-        easter_egg, res$query_id, res$query_id, format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+        machine_benediction, res$query_id, res$query_id, format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
         tag_rows, binding_summary, nrow(df), n_homologs, struct_name,
         res$query_id, res$query_id, struct_name
       )
@@ -1559,7 +1559,7 @@ img { max-width: 100%%; border: 1px solid #ddd; margin: 1em 0; }
         on.exit(setwd(old_wd), add = TRUE)
         utils::zip(zipfile = file, files = list.files("."))
       }
-      set_zip_comment(file, easter_egg)
+      set_zip_comment(file, machine_benediction)
     },
     contentType = "application/zip"
   )
