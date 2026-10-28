@@ -37,7 +37,11 @@ if (is.null(alphafold_file_custom)) {
         Sys.sleep(runif(1, 10, 30))
         alphafold_file <- fetch_alphafold(af_id)
     }
-    if(!is.character(alphafold_file) || is.na(alphafold_file)){stop("No alphafold file found for ", query, " on disk or online")}
+    if(!is.character(alphafold_file) || is.na(alphafold_file)){
+        stop("No alphafold file found for ", query, " on disk or online. Download it in a browser from ",
+             "https://alphafold.ebi.ac.uk/entry/", af_id, " (mmCIF: https://alphafold.ebi.ac.uk/files/AF-", af_id,
+             "-F1-model_v6.cif) into ", model_folder, "/, or pass a structure file as the second argument.")
+    }
 } else {
     alphafold_file <- alphafold_file_custom
 }

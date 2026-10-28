@@ -648,9 +648,31 @@ fetch_structure <- function(protein_id) {
   res <- fetch_alphafold(protein_id)
   if (!is.character(res) || is.na(res)) {
     stop("No AlphaFold structure for ", protein_id, " on disk (", output_file,
-         ") or online. Add it to the cache from the EBI FTP archive, or upload a structure file.")
+         ") or online. Download it from ", alphafold_entry_url(protein_id),
+         " into ", model_folder, "/, or upload a structure file.")
   }
   res
+}
+
+# Pages to get a structure by hand when fetch_structure() can't: AlphaFold
+# DB's site blocks scripted downloads but works in a browser.
+alphafold_entry_url <- function(protein_id) paste0("https://alphafold.ebi.ac.uk/entry/", protein_id)
+
+structure_download_help <- function(protein_id, query) {
+  af_file <- function(ext) paste0("https://alphafold.ebi.ac.uk/files/AF-", protein_id, "-F1-model_v6.", ext)
+  link <- function(href, text) tags$a(href = href, target = "_blank", rel = "noopener", text)
+  tagList(
+    tags$b(paste0("No AlphaFold structure for ", protein_id, " on disk, and the online download failed.")),
+    tags$p("Download it in your browser, then either upload it with the custom structure input or save it to ",
+           tags$code(paste0(model_folder, "/")), " and run again:"),
+    tags$ul(
+      tags$li(link(af_file("cif"), "mmCIF file"), " and ", link(af_file("pdb"), "PDB file"),
+              " (the PDB is used by the 3D viewer)"),
+      tags$li(link(alphafold_entry_url(protein_id), "AlphaFold DB entry"), " (other versions, if these links fail)"),
+      tags$li(link(paste0("https://www.uniprot.org/uniprotkb/", query, "/entry#structure"), "UniProt structure section"),
+              " (experimental structures and other models)")
+    )
+  )
 }
 
 # The dropdown holds UniProt accessions, but free text typed into it (e.g. a
@@ -718,7 +740,11 @@ server <- function(input, output, session) {
       } else {
         af_id <- uniprot_data$AlphaFoldDB
         if (is.na(af_id)) af_id <- query
-        fetch_structure(gsub(";", "", af_id))
+        af_id <- gsub(";", "", af_id)
+        tryCatch(fetch_structure(af_id), error = function(e) {
+          showNotification(structure_download_help(af_id, query), type = "error", duration = NULL)
+          stop(e)
+        })
       }
 
       dssp_res <- dssp_command(alphafold_file)
