@@ -476,8 +476,9 @@ ui <- fluidPage(
         "Start typing a gene name (e.g. smad5, hdac1) or paste a UniProt ID directly. Hover any option to see its full protein name."
       ),
       tooltip(
-        fileInput("custom_structure", "Custom AlphaFold .cif (optional)", accept = ".cif"),
-        "Upload your own AlphaFold structure file instead of fetching one automatically from UniProt/AlphaFoldDB."
+        fileInput("custom_structure", "Custom AlphaFold .cif, plus its .pdb (optional)",
+                  accept = c(".cif", ".pdb"), multiple = TRUE),
+        "Upload your own AlphaFold structure file instead of fetching one automatically from UniProt/AlphaFoldDB. The .cif is required (it's used for secondary structure and solvent accessibility); select the matching .pdb along with it so the 3D viewer can display it."
       ),
       tooltip(
         numericInput("start_resnum", "Start residue index (if custom structure)", value = 1, min = 1),
@@ -561,14 +562,20 @@ ui <- fluidPage(
 # MobiDB's precomputed ANCHOR binding regions as a per-residue anchor2 vector:
 # 1 inside a region, 0 outside. Coarser than IUPred2A's 0-1 scores, but the
 # same predictor. Read from the local cache (data/mobidb/<accession>.json,
-# filled by fetch_mobidb_cache.R) first, else from the MobiDB API. Errors if
-# MobiDB has no entry or its sequence differs from UniProt's (region positions
-# would then be misaligned).
+# filled by fetch_mobidb_cache.R) first, else from the MobiDB API, saving the
+# API answer to the cache so the next lookup is local. Errors if MobiDB has no
+# entry or its sequence differs from UniProt's (region positions would then be
+# misaligned).
 mobidb_anchor <- function(query, sequence) {
   cached <- file.path(dataFolder, "mobidb", paste0(query, ".json"))
-  entry <- jsonlite::fromJSON(if (file.exists(cached)) cached else
-    paste0("https://mobidb.org/api/download?acc=", query, "&format=json"))
+  json <- if (file.exists(cached)) readLines(cached, warn = FALSE) else
+    readLines(paste0("https://mobidb.org/api/download?acc=", query, "&format=json"), warn = FALSE)
+  entry <- jsonlite::fromJSON(paste(json, collapse = "\n"))
   if (!identical(entry$sequence, sequence)) stop("MobiDB sequence differs from UniProt")
+  if (!file.exists(cached)) {
+    dir.create(dirname(cached), recursive = TRUE, showWarnings = FALSE)
+    writeLines(json, cached)
+  }
   anchor2 <- numeric(nchar(sequence))
   regions <- entry[["prediction-lip-anchor"]]$regions
   for (i in seq_len(NROW(regions))) anchor2[regions[i, 1]:regions[i, 2]] <- 1
@@ -619,6 +626,41 @@ fetch_structure <- function(protein_id) {
   res
 }
 
+# The dropdown holds UniProt accessions, but free text typed into it (e.g. a
+# gene name like "exoc3l2a") would go straight to UniProt's search, which
+# returns up to 25 hits across every species. Resolve it to one accession
+# first: anything shaped like a UniProt accession is used as-is; anything else
+# is treated as a zebrafish gene name (reviewed entries first). Returns the
+# accession plus any other zebrafish entries for that gene name.
+uniprot_acc_regex <- "^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$"
+
+resolve_query <- function(query) {
+  query <- trimws(query)
+  if (!nzchar(query)) stop("Enter a UniProt accession or zebrafish gene name.")
+  if (grepl(uniprot_acc_regex, toupper(query))) return(list(acc = toupper(query), others = character(0)))
+  hits <- query_uniProt(query = paste0("gene_exact:", query, " AND organism_id:7955"),
+                        fields = c("accession", "reviewed"))
+  if (!nrow(hits)) stop("No zebrafish UniProt entry for gene '", query, "'. Check the spelling, or enter a UniProt accession.")
+  hits <- hits[order(hits$Reviewed != "reviewed"), ]
+  list(acc = hits$Entry[1], others = hits$Entry[-1])
+}
+
+# Uploaded files arrive under Shiny temp names ("0.cif"), which hides the
+# AlphaFold file name the structure viewer relies on and makes every upload
+# write the same data/models/0.dssp. Copy each uploaded file into model_folder
+# under its original name instead: an uploaded AlphaFold model then also
+# fills the disk cache for later runs, and a .pdb uploaded with its .cif is
+# found by the viewer. Returns the .cif path (DSSP needs mmCIF).
+stage_upload <- function(upload) {
+  dest <- file.path(model_folder, gsub("[^A-Za-z0-9._-]", "_", basename(upload$name)))
+  file.copy(upload$datapath, dest, overwrite = TRUE)
+  cif <- dest[grepl("\\.(cif|mmcif|mcif)$", dest, ignore.case = TRUE)]
+  if (length(cif) != 1) {
+    stop("Upload exactly one .cif (mmCIF) structure file; its matching .pdb alongside it is optional.")
+  }
+  cif
+}
+
 server <- function(input, output, session) {
 
   updateSelectizeInput(session, "query", choices = protein_choices, server = TRUE, selected = character(0))
@@ -630,20 +672,31 @@ server <- function(input, output, session) {
 
       uniprot_fields <- c("accession", "id", "gene_names", "xref_alphafolddb",
                            "sequence", "organism_name", "organism_id", "ft_binding")
-      uniprot_data <- query_uniProt(query = input$query, fields = uniprot_fields)
+      resolved <- resolve_query(input$query)
+      query <- resolved$acc
+      if (query != trimws(input$query)) {
+        showNotification(
+          paste0("'", input$query, "' resolved to zebrafish UniProt entry ", query,
+                 if (length(resolved$others))
+                   paste0(". Other entries for this gene: ", paste(resolved$others, collapse = ", "),
+                          " -- enter one directly to use it instead.")),
+          type = "message", duration = 15)
+      }
+      uniprot_data <- query_uniProt(query = paste0("accession:", query), fields = uniprot_fields)
+      if (nrow(uniprot_data) != 1) stop("No UniProt entry for accession ", query)
       binding_sites <- parse_uniprot_binding(uniprot_data$Binding.site)
 
       alphafold_file <- if (!is.null(input$custom_structure)) {
-        input$custom_structure$datapath
+        stage_upload(input$custom_structure)
       } else {
         af_id <- uniprot_data$AlphaFoldDB
-        if (is.na(af_id)) af_id <- input$query
+        if (is.na(af_id)) af_id <- query
         fetch_structure(gsub(";", "", af_id))
       }
 
       dssp_res <- dssp_command(alphafold_file)
       dssp_df  <- parse_dssp(dssp_res)
-      iupred_res <- fetch_iupred(input$query, uniprot_data$Sequence)
+      iupred_res <- fetch_iupred(query, uniprot_data$Sequence)
       iupred_df <- iupred_res$df
       if (iupred_res$source != "iupred") {
         showNotification(
@@ -662,7 +715,7 @@ server <- function(input, output, session) {
       blast_results <- lapply(aa_files, function(.x) protein_blast(seq, .x))
       blast_best_match <- lapply(blast_results, function(.x) head(.x[order(.x$E), ], 1))
       blast_seqs <- lapply(blast_best_match, fetch_sequences)
-      blast_seqs[[input$query]] <- seq
+      blast_seqs[[query]] <- seq
       blast_stringset <- Biostrings::AAStringSet(unlist(lapply(blast_seqs, function(.x) .x[[1]])))
 
       msa_res <- tryCatch(
@@ -670,7 +723,7 @@ server <- function(input, output, session) {
         error = function(e) stop("Alignment failed: ", conditionMessage(e))
       )
 
-      shannon_df <- shannon_reshape(msa_res, input$query)
+      shannon_df <- shannon_reshape(msa_res, query)
 
       features_df <- Reduce(function(x, y) merge(x, y, all = TRUE),
                              list(shannon_df, dssp_df, iupred_df))
@@ -687,7 +740,7 @@ server <- function(input, output, session) {
         msa_res = msa_res,
         alphafold_file = alphafold_file,
         binding_sites = binding_sites,
-        query_id = input$query
+        query_id = query
       )
     })
   })
@@ -707,7 +760,7 @@ server <- function(input, output, session) {
   # (start == end for a plain click). Every panel (score/feature plot,
   # alignment, 3D structure) reads this and redraws its own highlight.
   tag_range <- reactiveVal(NULL)
-  observeEvent(results(), { tag_range(NULL) })
+  observeEvent(tryCatch(results(), error = function(e) NULL), { tag_range(NULL) })
 
   # Where the user is currently scrolled to in the (non-full) alignment
   # strip -- updated as they drag it sideways (see the plotly_relayout
@@ -716,7 +769,7 @@ server <- function(input, output, session) {
   # scroll tick); it only drives the "current position of interest" line on
   # the score/feature plot, so that line tracks wherever they've scrolled.
   pan_center <- reactiveVal(NULL)
-  observeEvent(results(), { pan_center(NULL) })
+  observeEvent(tryCatch(results(), error = function(e) NULL), { pan_center(NULL) })
   observeEvent(event_data("plotly_relayout", source = "msa_view"), {
     ev <- event_data("plotly_relayout", source = "msa_view")
     r0 <- ev[["xaxis.range[0]"]]; r1 <- ev[["xaxis.range[1]"]]
@@ -1256,23 +1309,24 @@ server <- function(input, output, session) {
     # none (it's a single predicted chain), and NGL indexed into that
     # missing array. AlphaFoldDB also publishes the same model as a plain
     # .pdb, and NGL's PDB parser doesn't expect assembly records, so we
-    # prefer that format when we can derive its URL from the .cif we fetched.
+    # prefer that format: a .pdb next to the .cif on disk (cached or uploaded),
+    # else, for an AlphaFold-named file, the .pdb from AlphaFoldDB.
     struct_file   <- res$alphafold_file
     struct_format <- tolower(tools::file_ext(struct_file))
 
-    if (struct_format %in% c("cif", "mmcif", "mcif") &&
-        grepl("^AF-", basename(struct_file))) {
-      pdb_url   <- sub("\\.(cif|mmcif|mcif)$", ".pdb",
-                        file.path("https://alphafold.ebi.ac.uk/files", basename(struct_file)),
-                        ignore.case = TRUE)
+    if (struct_format %in% c("cif", "mmcif", "mcif")) {
       pdb_local <- sub("\\.(cif|mmcif|mcif)$", ".pdb", struct_file, ignore.case = TRUE)
-      got_pdb <- tryCatch({
-        if (!file.exists(pdb_local)) {
+      if (!file.exists(pdb_local) && grepl("^AF-", basename(struct_file))) {
+        pdb_url <- file.path("https://alphafold.ebi.ac.uk/files", basename(pdb_local))
+        tryCatch({
           alphafold_lookup_delay()
           download.file(pdb_url, pdb_local, quiet = TRUE, mode = "wb")
-        }
-        file.exists(pdb_local) && file.info(pdb_local)$size > 0
-      }, error = function(e) FALSE)
+        }, error = function(e) NULL)
+        # a failed download can leave an empty file behind; drop it so the
+        # next run tries again instead of treating it as cached
+        if (file.exists(pdb_local) && file.info(pdb_local)$size == 0) unlink(pdb_local)
+      }
+      got_pdb <- file.exists(pdb_local) && file.info(pdb_local)$size > 0
       if (isTRUE(got_pdb)) {
         struct_file   <- pdb_local
         struct_format <- "pdb"
@@ -1340,7 +1394,7 @@ server <- function(input, output, session) {
   })
 
   observe({
-    req(results())
+    req(tryCatch(results(), error = function(e) NULL))
     rng <- tag_range()
     proxy <- NGLVieweR_proxy("structure_view")
     proxy %>% removeSelection("userTag") %>% removeSelection("userTagLabel")
