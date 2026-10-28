@@ -32,10 +32,10 @@ body_text <- sub(target_pattern, "which.min(.x)", body_text)
 body(calculate_scores) <- parse(text = body_text)[[1]]
 
 # --- Protein reference list for the searchable dropdown ---------------------
-# zebrafish_proteins.csv must sit next to app.R. It's a starter reference
-# list (UniProt reviewed Danio rerio entries: uniprot_id, gene_name,
-# protein_name, length, alphafold_id) -- not necessarily the complete
-# zebrafish proteome. The dropdown still accepts free-text UniProt IDs for
+# zebrafish_proteins.csv must sit next to app.R. It lists one UniProt entry
+# per zebrafish gene plus every reviewed Danio rerio entry (uniprot_id,
+# gene_name, protein_name, length, alphafold_id); rebuild it with
+# build_protein_list.R. The dropdown still accepts free-text UniProt IDs for
 # anything not in the list (options = list(create = TRUE) below), so this
 # never blocks a query -- it's just a convenience list.
 protein_ref <- tryCatch(

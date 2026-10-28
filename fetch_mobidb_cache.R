@@ -2,7 +2,9 @@
 # One-off: download MobiDB entries (including ANCHOR binding regions) for every
 # protein in the protein list into data/mobidb/<accession>.json, so the IUPred2A
 # fallback in app.R / single_score.R reads them from disk instead of the API.
-# Safe to re-run: accessions already on disk are skipped.
+# Safe to re-run: accessions already on disk are skipped. For the full
+# zebrafish list (~26.6k proteins, 50 per request, 10-30 s apart) a first run
+# takes about 3 hours.
 # usage: Rscript fetch_mobidb_cache.R [proteins.csv]   (run from the repo root)
 
 args <- commandArgs(trailingOnly = TRUE)
