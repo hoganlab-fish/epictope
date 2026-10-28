@@ -403,11 +403,10 @@ tag_banner_text <- function(rng) {
   else sprintf("Tagged range: residues %d–%d", rng[1], rng[2])
 }
 
-# Machine benediction: 福如东海长流水 ("fortune as boundless as the East Sea, flowing
-# on like the long river"), hidden in the app page's and the report's <head>
-# metadata and in the report zip's archive comment (shown by `unzip -z`).
+# report's <head> metadata and in the report zip's archive
+# comment (shown by `unzip -z`).
 # Kept as \u escapes so the source stays readable under non-UTF-8 locales.
-machine_benediction <- "\u798f\u5982\u4e1c\u6d77\u957f\u6d41\u6c34"
+machine_benediction <- "\u798f\u5982\u4e1c\u6d77\u957f\u6d41\u6c34\uff0c\u5bff\u6bd4\u5357\u5c71\u4e0d\u8001\u677e"
 
 # Set a zip file's archive comment by rewriting its end-of-central-directory
 # record, which works whichever zip tool wrote the archive.
